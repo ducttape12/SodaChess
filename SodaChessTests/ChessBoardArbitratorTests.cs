@@ -410,5 +410,94 @@ namespace SodaChessTests
             var destinationPiece = arbitrator.GetPiece(pawnDestination);
             Assert.AreEqual(new ChessPiece(PieceType.Queen, SideType.White), destinationPiece);
         }
+
+        [TestMethod]
+        public void GivenWhitePawnOnStart_WhenMovedOneFile_ThenNotAvailableForEnPassant()
+        {
+            var board = new ChessBoard();
+            var pawnSource = new ChessCoordinate("E", "2");
+            var pawnDestination = new ChessCoordinate("E", "3");
+            var pawn = new ChessPiece(PieceType.Pawn, SideType.White);
+            board.SetPiece(pawnSource, pawn);
+            board.SetPiece(new ChessCoordinate("H", "1"), new ChessPiece(PieceType.King, SideType.White));
+            board.SetPiece(new ChessCoordinate("H", "8"), new ChessPiece(PieceType.King, SideType.Black));
+            var arbitrator = new ChessBoardArbitrator(board, SideType.White);
+
+            arbitrator.MakeMove(pawnSource, pawnDestination);
+
+            Assert.IsNull(board.AvailableForEnPassant);
+        }
+
+        [TestMethod]
+        public void GivenWhitePawnOnStart_WhenMovedTwoFiles_ThenAvailableForEnPassant()
+        {
+            var board = new ChessBoard();
+            var pawnSource = new ChessCoordinate("E", "2");
+            var pawnDestination = new ChessCoordinate("E", "4");
+            var pawn = new ChessPiece(PieceType.Pawn, SideType.White);
+            board.SetPiece(pawnSource, pawn);
+            board.SetPiece(new ChessCoordinate("H", "1"), new ChessPiece(PieceType.King, SideType.White));
+            board.SetPiece(new ChessCoordinate("H", "8"), new ChessPiece(PieceType.King, SideType.Black));
+            var arbitrator = new ChessBoardArbitrator(board, SideType.White);
+
+            arbitrator.MakeMove(pawnSource, pawnDestination);
+
+            Assert.IsNotNull(board.AvailableForEnPassant);
+            Assert.AreEqual(new ChessCoordinate("E", "3"), board.AvailableForEnPassant);
+        }
+
+        [TestMethod]
+        public void GivenBlackPawnOnStart_WhenMovedOneFile_ThenNotAvailableForEnPassant()
+        {
+            var board = new ChessBoard();
+            var pawnSource = new ChessCoordinate("E", "7");
+            var pawnDestination = new ChessCoordinate("E", "6");
+            var pawn = new ChessPiece(PieceType.Pawn, SideType.Black);
+            board.SetPiece(pawnSource, pawn);
+            board.SetPiece(new ChessCoordinate("H", "1"), new ChessPiece(PieceType.King, SideType.White));
+            board.SetPiece(new ChessCoordinate("H", "8"), new ChessPiece(PieceType.King, SideType.Black));
+            var arbitrator = new ChessBoardArbitrator(board, SideType.Black);
+
+            arbitrator.MakeMove(pawnSource, pawnDestination);
+
+            Assert.IsNull(board.AvailableForEnPassant);
+        }
+
+        [TestMethod]
+        public void GivenBlackPawnOnStart_WhenMovedTwoFiles_ThenAvailableForEnPassant()
+        {
+            var board = new ChessBoard();
+            var pawnSource = new ChessCoordinate("E", "7");
+            var pawnDestination = new ChessCoordinate("E", "5");
+            var pawn = new ChessPiece(PieceType.Pawn, SideType.Black);
+            board.SetPiece(pawnSource, pawn);
+            board.SetPiece(new ChessCoordinate("H", "1"), new ChessPiece(PieceType.King, SideType.White));
+            board.SetPiece(new ChessCoordinate("H", "8"), new ChessPiece(PieceType.King, SideType.Black));
+            var arbitrator = new ChessBoardArbitrator(board, SideType.Black);
+
+            arbitrator.MakeMove(pawnSource, pawnDestination);
+
+            Assert.IsNotNull(board.AvailableForEnPassant);
+            Assert.AreEqual(new ChessCoordinate("E", "6"), board.AvailableForEnPassant);
+        }
+
+        [TestMethod]
+        public void GivenAvailableForEnPassant_WhenPieceMoved_ThenNotAvailableForEnPassant()
+        {
+            var board = new ChessBoard();
+            var pawnSource = new ChessCoordinate("E", "7");
+            var pawnDestination = new ChessCoordinate("E", "5");
+            var pawn = new ChessPiece(PieceType.Pawn, SideType.Black);
+            var whiteKingSource = new ChessCoordinate("H", "1");
+            board.SetPiece(pawnSource, pawn);
+            board.SetPiece(whiteKingSource, new ChessPiece(PieceType.King, SideType.White));
+            board.SetPiece(new ChessCoordinate("H", "8"), new ChessPiece(PieceType.King, SideType.Black));
+            var arbitrator = new ChessBoardArbitrator(board, SideType.Black);
+            
+            arbitrator.MakeMove(pawnSource, pawnDestination);
+            arbitrator.MakeMove(whiteKingSource, new ChessCoordinate("H", "2"));
+
+            Assert.IsNull(board.AvailableForEnPassant);
+        }
     }
 }

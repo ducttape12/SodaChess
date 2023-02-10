@@ -31,11 +31,13 @@ namespace SodaChess
          * Rank 1-8 maps to 7-0 in the first element
          * File A-H maps to 0-7 in the second element
          *
-         * Accessing it looks like this: board[rank][file]
+         * Accessing it looks like this: board[rank, file]
          *
-         * For example, D3 is board[5][3]
+         * For example, D3 is board[5, 3]
          */
         private readonly ChessPiece?[,] board;
+
+        public ChessCoordinate? AvailableForEnPassant { get; set; }
 
         public ChessBoard() {
             board = new ChessPiece[8, 8];

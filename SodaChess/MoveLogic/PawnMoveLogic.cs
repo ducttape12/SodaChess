@@ -85,20 +85,34 @@ namespace SodaChess.MoveLogic
                 moves.Add(twoRanksForward);
             }
 
-            // Capture a piece by moving diagonally left if an opponent piece exists there
-            if (diagonallyLeft != null &&
-                    board.GetPiece(diagonallyLeft) != null &&
-                    board.GetPiece(diagonallyLeft).SideType != startingPiece.SideType)
+            // Capture a piece by moving diagonally left if an opponent piece exists there or if en passant is available
+            if (diagonallyLeft != null)
             {
-                moves.Add(diagonallyLeft);
+                var pieceDiagonallyLeft = board.GetPiece(diagonallyLeft);
+
+                var opponentPieceExistsDiagonallyLeft = pieceDiagonallyLeft != null &&
+                    pieceDiagonallyLeft.SideType != startingPiece.SideType;
+                var enPassantAvailableDiagonallyLeft = board.AvailableForEnPassant == diagonallyLeft;
+
+                if (opponentPieceExistsDiagonallyLeft || enPassantAvailableDiagonallyLeft)
+                {
+                    moves.Add(diagonallyLeft);
+                }
             }
 
-            // Capture a piece by moving diagonally right if an opponent piece exists there
-            if (diagonallyRight != null &&
-                    board.GetPiece(diagonallyRight) != null &&
-                    board.GetPiece(diagonallyRight).SideType != startingPiece.SideType)
+            // Capture a piece by moving diagonally right if an opponent piece exists there or if en passant is available
+            if (diagonallyRight != null)
             {
-                moves.Add(diagonallyRight);
+                var pieceDiagonallyRight = board.GetPiece(diagonallyRight);
+
+                var opponentPieceExistsDiagonallyRight = pieceDiagonallyRight != null &&
+                    pieceDiagonallyRight.SideType != startingPiece.SideType;
+                var enPassantAvailableDiagonallyRight = board.AvailableForEnPassant == diagonallyRight;
+
+                if (opponentPieceExistsDiagonallyRight || enPassantAvailableDiagonallyRight)
+                {
+                    moves.Add(diagonallyRight);
+                }
             }
 
             return moves;

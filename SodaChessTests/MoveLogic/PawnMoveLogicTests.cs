@@ -258,5 +258,73 @@ namespace SodaChessTests.MoveLogic
             Assert.IsTrue(moves.Contains(whitePiece1Coordinates));
             Assert.IsTrue(moves.Contains(whitePiece2Coordinates));
         }
+
+        [TestMethod]
+        public void GivenWhitePawn_WhenEnPassantAvailableDiagonallyLeft_ThenCanMoveDiagonallyLeft()
+        {
+            var board = new ChessBoard
+            {
+                AvailableForEnPassant = new ChessCoordinate("C", "6")
+            };
+            var pieceCoordinates = new ChessCoordinate("D", "5");
+            board.SetPiece(pieceCoordinates, new ChessPiece(PieceType.Pawn, SideType.White));
+            var logic = new PawnMoveLogic(board, pieceCoordinates);
+
+            var moves = logic.GetMoveList();
+
+            Assert.IsTrue(moves.Contains(new ChessCoordinate("C", "6")));  // Diagonally left
+            Assert.IsFalse(moves.Contains(new ChessCoordinate("E", "6"))); // Diagonally right
+        }
+
+        [TestMethod]
+        public void GivenWhitePawn_WhenEnPassantAvailableDiagonallyRight_ThenCanMoveDiagonallyRight()
+        {
+            var board = new ChessBoard
+            {
+                AvailableForEnPassant = new ChessCoordinate("E", "6")
+            };
+            var pieceCoordinates = new ChessCoordinate("D", "5");
+            board.SetPiece(pieceCoordinates, new ChessPiece(PieceType.Pawn, SideType.White));
+            var logic = new PawnMoveLogic(board, pieceCoordinates);
+
+            var moves = logic.GetMoveList();
+
+            Assert.IsFalse(moves.Contains(new ChessCoordinate("C", "6"))); // Diagonally left
+            Assert.IsTrue(moves.Contains(new ChessCoordinate("E", "6")));  // Diagonally right
+        }
+
+        [TestMethod]
+        public void GivenBlackPawn_WhenEnPassantAvailableDiagonallyLeft_ThenCanMoveDiagonallyLeft()
+        {
+            var board = new ChessBoard
+            {
+                AvailableForEnPassant = new ChessCoordinate("F", "3")
+            };
+            var pieceCoordinates = new ChessCoordinate("E", "4");
+            board.SetPiece(pieceCoordinates, new ChessPiece(PieceType.Pawn, SideType.Black));
+            var logic = new PawnMoveLogic(board, pieceCoordinates);
+
+            var moves = logic.GetMoveList();
+
+            Assert.IsTrue(moves.Contains(new ChessCoordinate("F", "3")));  // Diagonally left
+            Assert.IsFalse(moves.Contains(new ChessCoordinate("D", "3"))); // Diagonally right
+        }
+
+        [TestMethod]
+        public void GivenBlackPawn_WhenEnPassantAvailableDiagonallyRight_ThenCanMoveDiagonallyRight()
+        {
+            var board = new ChessBoard
+            {
+                AvailableForEnPassant = new ChessCoordinate("D", "3")
+            };
+            var pieceCoordinates = new ChessCoordinate("E", "4");
+            board.SetPiece(pieceCoordinates, new ChessPiece(PieceType.Pawn, SideType.Black));
+            var logic = new PawnMoveLogic(board, pieceCoordinates);
+
+            var moves = logic.GetMoveList();
+
+            Assert.IsFalse(moves.Contains(new ChessCoordinate("F", "3"))); // Diagonally left
+            Assert.IsTrue(moves.Contains(new ChessCoordinate("D", "3")));  // Diagonally right
+        }
     }
 }

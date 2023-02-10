@@ -120,6 +120,9 @@ namespace SodaChess
             board.SetPiece(destination, sourcePiece);
             board.SetPiece(source, null);
 
+            // If a pawn moved two ranks, the middle rank is available for an en passant
+            UpdateAvailableForEnPassant(source, destination, sourcePiece);
+
             // If this makes a piece ready for promotion, then request additional information
             coordinateReadyForPromotion = CoordinateReadyForPromotion();
 
@@ -129,6 +132,22 @@ namespace SodaChess
             }
 
             return SwitchSidesAndCalculateBoardState();
+        }
+
+        private void UpdateAvailableForEnPassant(ChessCoordinate source, ChessCoordinate destination, ChessPiece piece)
+        {
+            if(piece.PieceType == PieceType.Pawn && source.Rank == "2" && destination.Rank == "4")
+            {
+                board.AvailableForEnPassant = new ChessCoordinate(source.File, "3");
+            }
+            else if (piece.PieceType == PieceType.Pawn && source.Rank == "7" && destination.Rank == "5")
+            {
+                board.AvailableForEnPassant = new ChessCoordinate(source.File, "6");
+            }
+            else
+            {
+                board.AvailableForEnPassant = null;
+            }
         }
 
         private MoveResult SwitchSidesAndCalculateBoardState()
