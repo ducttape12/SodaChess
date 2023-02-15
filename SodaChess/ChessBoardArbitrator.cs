@@ -14,6 +14,13 @@ namespace SodaChess
 
         private ChessCoordinate? coordinateReadyForPromotion = null;
 
+        private bool a1RookMoved = false;
+        private bool whiteKingMoved = false;
+        private bool h1RookMoved = false;
+        private bool a8RookMoved = false;
+        private bool blackKingMoved = false;
+        private bool h8RookMoved = false;
+
         public ChessBoardArbitrator()
         {
             board = new ChessBoard();
@@ -84,7 +91,16 @@ namespace SodaChess
                 return MoveResult.InvalidNoMoveMade;
             }
 
-            // Is move even a valid move for this piece?
+            // Perform a castle if the player is attempting
+            var castlePerformed = PerformCastle(source, destination, sourcePiece);
+
+            // If a castle was performed, then no further action is needed
+            if (castlePerformed)
+            {
+                return SwitchSidesAndCalculateBoardState();
+            }
+
+            // Determine if this is a valid move for the piece
             var possiblePieceMoves = ValidMoves(source);
 
             if (!possiblePieceMoves.Contains(destination))
@@ -120,6 +136,9 @@ namespace SodaChess
             board.SetPiece(destination, sourcePiece);
             board.SetPiece(source, null);
 
+            // Update if rooks or kings have moved
+            UpdateCastlingAvailability(source, sourcePiece);
+
             // If a pawn moved two ranks, the middle rank is available for an en passant
             UpdateAvailableForEnPassant(source, destination, sourcePiece);
 
@@ -134,9 +153,177 @@ namespace SodaChess
             return SwitchSidesAndCalculateBoardState();
         }
 
+        private void UpdateCastlingAvailability(ChessCoordinate source, ChessPiece piece)
+        {
+            // Don't need to check if it's rook since only rooks can move off these coordinates.
+            if (!a1RookMoved && source == new ChessCoordinate("A", "1"))
+            {
+                a1RookMoved = true;
+            }
+            else if (!h1RookMoved && source == new ChessCoordinate("H", "1"))
+            {
+                h1RookMoved = true;
+            }
+            else if (!a8RookMoved && source == new ChessCoordinate("A", "8"))
+            {
+                a8RookMoved = true;
+            }
+            else if (!h8RookMoved && source == new ChessCoordinate("H", "8"))
+            {
+                h8RookMoved = true;
+            }
+            else if (piece.PieceType == PieceType.King && piece.SideType == SideType.White)
+            {
+                whiteKingMoved = true;
+            }
+            else if (piece.PieceType == PieceType.King && piece.SideType == SideType.Black)
+            {
+                blackKingMoved = true;
+            }
+        }
+
+        private bool PerformCastle(ChessCoordinate kingSource, ChessCoordinate kingDestination, ChessPiece kingPiece)
+        {
+            if(kingPiece.PieceType != PieceType.King)
+            {
+                return false;
+            }
+
+            // Determine if a king is attempting to move two squares towards a rook and neither the king nor
+            // the rook have moved this game
+            var whiteCastling00 =
+                kingPiece.SideType == SideType.White &&
+                !whiteKingMoved &&
+                !h1RookMoved &&
+                kingSource == new ChessCoordinate("E", "1") &&
+                kingDestination == new ChessCoordinate("G", "1");
+            var whiteCastling000 =
+                kingPiece.SideType == SideType.White &&
+                !whiteKingMoved &&
+                !a1RookMoved &&
+                kingSource == new ChessCoordinate("E", "1") &&
+                kingDestination == new ChessCoordinate("C", "1");
+            var blackCastling00 =
+                kingPiece.SideType == SideType.Black &&
+                !blackKingMoved &&
+                !h8RookMoved &&
+                kingSource == new ChessCoordinate("E", "8") &&
+                kingDestination == new ChessCoordinate("G", "8");
+            var blackCastling000 =
+                kingPiece.SideType == SideType.Black &&
+                !blackKingMoved &&
+                !a8RookMoved &&
+                kingSource == new ChessCoordinate("E", "8") &&
+                kingDestination == new ChessCoordinate("C", "8");
+
+            if (!whiteCastling00 && !whiteCastling000 &&
+                !blackCastling00 && !blackCastling000)
+            {
+                return false;
+            }
+
+            // Coordinates needed for this action
+            List<ChessCoordinate> emptyCoordinates;
+            ChessCoordinate kingPassThroughCoordinate;
+            ChessCoordinate rookSource;
+            ChessCoordinate rookDestination;
+
+            if (whiteCastling00)
+            {
+                emptyCoordinates = new List<ChessCoordinate>()
+                {
+                    new ChessCoordinate("F", "1"),
+                    new ChessCoordinate("G", "1")
+                };
+                kingPassThroughCoordinate = new ChessCoordinate("F", "1");
+                rookSource = new ChessCoordinate("H", "1");
+                rookDestination = new ChessCoordinate("F", "1");
+            }
+            else if (whiteCastling000)
+            {
+                emptyCoordinates = new List<ChessCoordinate>()
+                {
+                    new ChessCoordinate("B", "1"),
+                    new ChessCoordinate("C", "1"),
+                    new ChessCoordinate("D", "1"),
+                };
+                kingPassThroughCoordinate = new ChessCoordinate("D", "1");
+                rookSource = new ChessCoordinate("A", "1");
+                rookDestination = new ChessCoordinate("D", "1");
+            }
+            else if (blackCastling00)
+            {
+                emptyCoordinates = new List<ChessCoordinate>()
+                {
+                    new ChessCoordinate("F", "8"),
+                    new ChessCoordinate("G", "8"),
+                };
+                kingPassThroughCoordinate = new ChessCoordinate("F", "8");
+                rookSource = new ChessCoordinate("H", "8");
+                rookDestination = new ChessCoordinate("F", "8");
+            }
+            else // blackAttemptingCastle000
+            {
+                emptyCoordinates = new List<ChessCoordinate>()
+                {
+                    new ChessCoordinate("B", "8"),
+                    new ChessCoordinate("C", "8"),
+                    new ChessCoordinate("D", "8"),
+                };
+                kingPassThroughCoordinate = new ChessCoordinate("D", "8");
+                rookSource = new ChessCoordinate("A", "8");
+                rookDestination = new ChessCoordinate("D", "8");
+            }
+
+            // All coordinates between the king and the rook must be empty
+            if (emptyCoordinates.Any(coordinate => GetPiece(coordinate) != null))
+            {
+                return false;
+            }
+
+            // Rook that's castling must exist
+            var rook = board.GetPiece(rookSource);
+            if (rook == null ||
+                rook.PieceType != PieceType.Rook ||
+                rook.SideType != CurrentPlayerSide)
+            {
+                return false;
+            }
+
+            // The king cannot be in check, pass through check, or end up in check
+            if (IsPlayerInCheck(board, CurrentPlayerSide) ||
+                MoveWillResultInPlayerCheck(kingSource, kingPassThroughCoordinate, CurrentPlayerSide) ||
+                MoveWillResultInPlayerCheck(kingSource, kingDestination, CurrentPlayerSide))
+            {
+                return false;
+            }
+
+            // Castling is allowed; perform the castle
+            board.SetPiece(rookSource, null);
+            board.SetPiece(rookDestination, rook);
+            board.SetPiece(kingSource, null);
+            board.SetPiece(kingDestination, kingPiece);
+
+            switch (CurrentPlayerSide)
+            {
+                case SideType.White:
+                    whiteKingMoved = true;
+                    a1RookMoved = true;
+                    h1RookMoved = true;
+                    break;
+                case SideType.Black:
+                    blackKingMoved = true;
+                    a8RookMoved = true;
+                    h8RookMoved = true;
+                    break;
+            }
+
+            return true;
+        }
+
         private void UpdateAvailableForEnPassant(ChessCoordinate source, ChessCoordinate destination, ChessPiece piece)
         {
-            if(piece.PieceType == PieceType.Pawn && source.Rank == "2" && destination.Rank == "4")
+            if (piece.PieceType == PieceType.Pawn && source.Rank == "2" && destination.Rank == "4")
             {
                 board.AvailableForEnPassant = new ChessCoordinate(source.File, "3");
             }
@@ -209,7 +396,7 @@ namespace SodaChess
 
             var pieceReadyForPromotion = GetPiece(coordinateReadyForPromotion);
 
-            if(pieceReadyForPromotion == null)
+            if (pieceReadyForPromotion == null)
             {
                 throw new ApplicationException($"Coordinate {coordinateReadyForPromotion} was marked for " +
                     "promotion, but no piece exists there");
@@ -326,7 +513,7 @@ namespace SodaChess
                 }
             }
 
-            if(currentPlayerKingCoordinates == null)
+            if (currentPlayerKingCoordinates == null)
             {
                 throw new ApplicationException($"No {playerSide} king found");
             }

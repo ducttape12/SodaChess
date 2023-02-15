@@ -23,6 +23,11 @@
             return HashCode.Combine(File, Rank);
         }
 
+        public override string? ToString()
+        {
+            return $"{File}{Rank}";
+        }
+
         public static bool operator ==(ChessCoordinate? left, ChessCoordinate? right)
         {
             return EqualityComparer<ChessCoordinate>.Default.Equals(left, right);
