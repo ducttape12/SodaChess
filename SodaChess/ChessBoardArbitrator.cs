@@ -14,6 +14,9 @@ namespace SodaChess
         public IList<ChessPiece> CapturedBlackPieces { get; private set; }
         public IList<ChessPiece> CapturedWhitePieces { get; private set; }
 
+        public int CapturedBlackPiecesValue => CapturedBlackPieces.Sum(p => p.Value);
+        public int CapturedWhitePiecesValue => CapturedWhitePieces.Sum(p => p.Value);
+
         private ChessCoordinate? coordinateReadyForPromotion = null;
 
         private bool a1RookMoved = false;
@@ -40,6 +43,25 @@ namespace SodaChess
             CurrentPlayerSide = currentPlayerSide;
             CapturedBlackPieces = new List<ChessPiece>();
             CapturedWhitePieces = new List<ChessPiece>();
+        }
+        
+        public ChessBoardArbitrator(ChessBoardArbitrator source)
+        {
+            board = new ChessBoard(source.board);
+            CurrentPlayerSide = source.CurrentPlayerSide;
+            CapturedBlackPieces = source.CapturedBlackPieces.Select(p => new ChessPiece(p)).ToList();
+            CapturedWhitePieces = source.CapturedWhitePieces.Select(p => new ChessPiece(p)).ToList();
+            coordinateReadyForPromotion = source.coordinateReadyForPromotion == null ?
+                null :
+                new ChessCoordinate(source.coordinateReadyForPromotion.File,
+                                    source.coordinateReadyForPromotion.Rank);
+            a1RookMoved = source.a1RookMoved;
+            whiteKingMoved = source.whiteKingMoved;
+            h1RookMoved = source.h1RookMoved;
+            a8RookMoved = source.a8RookMoved;
+            blackKingMoved = source.blackKingMoved;
+            h8RookMoved = source.h8RookMoved;
+            movesSincePawnOrCapture = source.movesSincePawnOrCapture;
         }
 
         public void InitializeBoard()

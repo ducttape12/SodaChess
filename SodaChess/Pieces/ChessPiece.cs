@@ -5,6 +5,16 @@
         public PieceType PieceType { get; set; }
         public SideType SideType { get; set; }
 
+        public int Value => PieceType switch
+        {
+            PieceType.Pawn => 1,
+            PieceType.Knight => 3,
+            PieceType.Bishop => 3,
+            PieceType.Rook => 5,
+            PieceType.Queen => 9,
+            _ => 0
+        };
+
         public ChessPiece(PieceType pieceType, SideType sideType)
         {
             PieceType = pieceType;
