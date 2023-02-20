@@ -5,6 +5,8 @@ namespace SodaChess
 {
     public class ChessBoardArbitrator
     {
+        private const int MaximumMovesWithoutPawnOrCapture = 100;
+
         private readonly ChessBoard board;
 
         public SideType CurrentPlayerSide { get; private set; }
@@ -20,6 +22,8 @@ namespace SodaChess
         private bool a8RookMoved = false;
         private bool blackKingMoved = false;
         private bool h8RookMoved = false;
+
+        private int movesSincePawnOrCapture = 0;
 
         public ChessBoardArbitrator()
         {
@@ -97,6 +101,7 @@ namespace SodaChess
             // If a castle was performed, then no further action is needed
             if (castlePerformed)
             {
+                movesSincePawnOrCapture = 0;
                 return SwitchSidesAndCalculateBoardState();
             }
 
@@ -130,6 +135,16 @@ namespace SodaChess
                     default:
                         throw new NotImplementedException();
                 }
+            }
+
+            // Update move counter
+            if (sourcePiece.PieceType == PieceType.Pawn || destinationPiece != null)
+            {
+                movesSincePawnOrCapture = 0;
+            }
+            else
+            {
+                movesSincePawnOrCapture++;
             }
 
             // Perform the move
@@ -184,7 +199,7 @@ namespace SodaChess
 
         private bool PerformCastle(ChessCoordinate kingSource, ChessCoordinate kingDestination, ChessPiece kingPiece)
         {
-            if(kingPiece.PieceType != PieceType.King)
+            if (kingPiece.PieceType != PieceType.King)
             {
                 return false;
             }
@@ -351,9 +366,12 @@ namespace SodaChess
             var inCheck = IsPlayerInCheck(board, CurrentPlayerSide);
             var playerHasValidMoves = AnyValidMovesNotResultingInCheck(CurrentPlayerSide);
             var onlyKingsRemaining = AreOnlyKingsRemaining();
+            var pastMoveLimit = movesSincePawnOrCapture >= MaximumMovesWithoutPawnOrCapture;
 
             var checkmate = inCheck && !playerHasValidMoves;
-            var stalemate = (!inCheck && !playerHasValidMoves) || onlyKingsRemaining;
+            var stalemate = (!inCheck && !playerHasValidMoves) ||
+                            onlyKingsRemaining ||
+                            pastMoveLimit;
 
             if (checkmate)
             {
@@ -436,13 +454,13 @@ namespace SodaChess
 
         private bool AreOnlyKingsRemaining()
         {
-            foreach(string file in Coordinates.Files)
+            foreach (string file in Coordinates.Files)
             {
-                foreach(string rank in Coordinates.Ranks)
+                foreach (string rank in Coordinates.Ranks)
                 {
                     var piece = GetPiece(new ChessCoordinate(file, rank));
 
-                    if(piece != null && piece.PieceType != PieceType.King)
+                    if (piece != null && piece.PieceType != PieceType.King)
                     {
                         return false;
                     }

@@ -1,10 +1,11 @@
 ﻿using SodaChess;
 using SodaChess.Pieces;
+using SodaChessTests.BaseTestLogic;
 
 namespace SodaChessTests
 {
     [TestClass]
-    public class ChessBoardArbitratorTests
+    public class ChessBoardArbitratorTests : BaseChessTests
     {
         [TestMethod]
         public void GivenAChessBoard_WhenInitializedIsCalled_ThenTheBoardIsInitializedCorrectly()
@@ -514,6 +515,80 @@ namespace SodaChessTests
             var result = arbitrator.MakeMove(whiteKingCoordinate, blackRookCoordinate);
 
             Assert.AreEqual(MoveResult.ValidStalemate, result);
+        }
+
+        [TestMethod]
+        public void GivenNoPawnMovedOrPieceCapturedIn99Moves_WhenNoPawnMovedOrPieceCaptured_ThenResultIsStalemate()
+        {
+            var arbitrator = new ChessBoardArbitrator();
+            for (var i = 0; i < 24; i++)
+            {
+                MakeMoves(arbitrator,
+                    "G1", "F3", // White knight
+                    "B8", "C6", // Black knight
+                    "F3", "G1", // White knight
+                    "C6", "B8"  // Black knight
+                );
+            }
+            MakeMoves(arbitrator,
+                    "G1", "F3", // White knight
+                    "B8", "C6", // Black knight
+                    "F3", "G1"  // White knight
+            );
+
+            var result = arbitrator.MakeMove(new ChessCoordinate("C", "6"), new ChessCoordinate("B", "8"));
+
+            Assert.AreEqual(MoveResult.ValidStalemate, result);
+        }
+
+        [TestMethod]
+        public void Given98MovesWithNoPawnOrCaptureAnd99MovePawn_WhenNoPawnMovedOrPieceCaptured_ThenResultIsValid()
+        {
+            var arbitrator = new ChessBoardArbitrator();
+            for (var i = 0; i < 24; i++)
+            {
+                MakeMoves(arbitrator,
+                    "G1", "F3", // White knight
+                    "B8", "C6", // Black knight
+                    "F3", "G1", // White knight
+                    "C6", "B8"  // Black knight
+                );
+            }
+            MakeMoves(arbitrator,
+                    "G1", "F3", // White knight
+                    "B8", "C6", // Black knight
+                    "F3", "G1", // White knight
+                    "A7", "A6"  // Black pawn
+            );
+
+            var result = arbitrator.MakeMove(new ChessCoordinate("G", "1"), new ChessCoordinate("F", "3"));
+
+            Assert.AreEqual(MoveResult.Valid, result);
+        }
+
+        [TestMethod]
+        public void Given98MovesWithNoPawnOrCaptureAnd99Capture_WhenNoPawnMovedOrPieceCaptured_ThenResultIsValid()
+        {
+            var arbitrator = new ChessBoardArbitrator();
+            for (var i = 0; i < 24; i++)
+            {
+                MakeMoves(arbitrator,
+                    "G1", "F3", // White knight
+                    "B8", "C6", // Black knight
+                    "F3", "G1", // White knight
+                    "C6", "B8"  // Black knight
+                );
+            }
+            MakeMoves(arbitrator,
+                    "G1", "F3", // White knight
+                    "B8", "C6", // Black knight
+                    "F3", "E5", // White knight
+                    "C6", "E5"  // Black knight captures white knight
+            );
+
+            var result = arbitrator.MakeMove(new ChessCoordinate("B", "1"), new ChessCoordinate("C", "3"));
+
+            Assert.AreEqual(MoveResult.Valid, result);
         }
     }
 }
