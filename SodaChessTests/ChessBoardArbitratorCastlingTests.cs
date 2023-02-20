@@ -648,7 +648,5 @@ namespace SodaChessTests
             Assert.IsNull(arbitrator.GetPiece(kingSource));
             Assert.AreEqual(SideType.White, arbitrator.CurrentPlayerSide);
         }
-
-        // TODO: Migrate other ChessBoardArbitrator tests to use the new MakeMoves helper function
     }
 }

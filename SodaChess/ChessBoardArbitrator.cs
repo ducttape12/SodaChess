@@ -24,7 +24,7 @@ namespace SodaChess
         public ChessBoardArbitrator()
         {
             board = new ChessBoard();
-            initializeBoard();
+            InitializeBoard();
             CurrentPlayerSide = SideType.White;
             CapturedBlackPieces = new List<ChessPiece>();
             CapturedWhitePieces = new List<ChessPiece>();
@@ -38,7 +38,7 @@ namespace SodaChess
             CapturedWhitePieces = new List<ChessPiece>();
         }
 
-        public void initializeBoard()
+        public void InitializeBoard()
         {
             board.SetPiece(new ChessCoordinate("A", "8"), new ChessPiece(PieceType.Rook, SideType.Black));
             board.SetPiece(new ChessCoordinate("B", "8"), new ChessPiece(PieceType.Knight, SideType.Black));
@@ -350,9 +350,10 @@ namespace SodaChess
             // Calculate board state
             var inCheck = IsPlayerInCheck(board, CurrentPlayerSide);
             var playerHasValidMoves = AnyValidMovesNotResultingInCheck(CurrentPlayerSide);
+            var onlyKingsRemaining = AreOnlyKingsRemaining();
 
             var checkmate = inCheck && !playerHasValidMoves;
-            var stalemate = !inCheck && !playerHasValidMoves;
+            var stalemate = (!inCheck && !playerHasValidMoves) || onlyKingsRemaining;
 
             if (checkmate)
             {
@@ -431,6 +432,24 @@ namespace SodaChess
             }
 
             return null;
+        }
+
+        private bool AreOnlyKingsRemaining()
+        {
+            foreach(string file in Coordinates.Files)
+            {
+                foreach(string rank in Coordinates.Ranks)
+                {
+                    var piece = GetPiece(new ChessCoordinate(file, rank));
+
+                    if(piece != null && piece.PieceType != PieceType.King)
+                    {
+                        return false;
+                    }
+                }
+            }
+
+            return true;
         }
 
         private bool AnyValidMovesNotResultingInCheck(SideType playerSide)

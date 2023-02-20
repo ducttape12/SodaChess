@@ -499,5 +499,21 @@ namespace SodaChessTests
 
             Assert.IsNull(board.AvailableForEnPassant);
         }
+
+        [TestMethod]
+        public void GivenKingCapturesLastOpponentPiece_WhenOnlyKingsRemain_ThenResultIsStalemate()
+        {
+            var board = new ChessBoard();
+            board.SetPiece(new ChessCoordinate("E", "8"), new ChessPiece(PieceType.King, SideType.Black));
+            var blackRookCoordinate = new ChessCoordinate("F", "2");
+            var whiteKingCoordinate = new ChessCoordinate("E", "1");
+            board.SetPiece(blackRookCoordinate, new ChessPiece(PieceType.Rook, SideType.Black));
+            board.SetPiece(whiteKingCoordinate, new ChessPiece(PieceType.King, SideType.White));
+            var arbitrator = new ChessBoardArbitrator(board, SideType.White);
+
+            var result = arbitrator.MakeMove(whiteKingCoordinate, blackRookCoordinate);
+
+            Assert.AreEqual(MoveResult.ValidStalemate, result);
+        }
     }
 }
