@@ -1,4 +1,6 @@
-﻿using SodaChess;
+﻿using SodaAI;
+using SodaAI.AI;
+using SodaChess;
 using SodaChess.Pieces;
 
 namespace ConsoleChess
@@ -13,75 +15,63 @@ namespace ConsoleChess
         private const ConsoleColor NormaTextBackground = ConsoleColor.Black;
         private const ConsoleColor NormalTextForeground = ConsoleColor.White;
 
+        private bool WhiteIsHuman = true;
+        private bool BlackIsHuman = true;
+
+        private ChessBoardArbitrator arbitrator;
+
         private static void Main(string[] args)
         {
-            var arbitrator = new ChessBoardArbitrator();
+            new Program().PlayChess();
+        }
+
+        public Program()
+        {
+            arbitrator = new ChessBoardArbitrator();
+        }
+
+        private void PlayChess()
+        { 
+            ConfigurePlayers();
 
             var lastResult = MoveResult.Valid;
+            AIMove previousAIMove = null;
 
             do
             {
                 if (lastResult == MoveResult.PromotionInputNeeded)
                 {
-                    Console.WriteLine($"{arbitrator.CurrentPlayerSide}, should the piece be promoted to (Q)ueen, " +
-                                    "(B)ishop, (K)night, or (R)ook? ");
-                    var promotionIdentifier = Console.ReadLine();
+                    PieceType promotionTarget;
 
-                    promotionIdentifier ??= string.Empty;
-
-                    switch (promotionIdentifier.ToUpperInvariant())
+                    if(CurrentPlayerIsHuman())
                     {
-                        case "Q":
-                            lastResult = arbitrator.PromotePiece(PieceType.Queen);
-                            break;
+                        promotionTarget = GetHumanPiecePromotion();
+                    }
+                    else
+                    {
+                        promotionTarget = previousAIMove.Promotion.Value;
+                    }
 
-                        case "B":
-                            lastResult = arbitrator.PromotePiece(PieceType.Bishop);
-                            break;
+                    lastResult = arbitrator.PromotePiece(promotionTarget);
 
-                        case "K":
-                            lastResult = arbitrator.PromotePiece(PieceType.Knight);
-                            break;
-
-                        case "R":
-                            lastResult = arbitrator.PromotePiece(PieceType.Rook);
-                            break;
-
-                        default:
-                            Console.WriteLine("Invalid input.");
-                            break;
-                    };
                 }
                 else
                 {
-                    DisplayBoard(arbitrator);
-
-                    Console.WriteLine($"{arbitrator.CurrentPlayerSide}, please enter your move.");
-                    var sourceFileRank = string.Empty;
-
-                    while(sourceFileRank == null || sourceFileRank.Length != 2)
+                    DisplayBoard();
+                    ChessCoordinate source, destination;
+                    if(CurrentPlayerIsHuman())
                     {
-                        Console.Write("Source File/Rank: ");
-                        sourceFileRank = Console.ReadLine();
+                        (source, destination) = GetHumanMove();
                     }
-
-                    var sourceFile = sourceFileRank.Substring(0, 1).ToUpperInvariant();
-                    var sourceRank = sourceFileRank.Substring(1, 1);
-                    Console.WriteLine($"Source File: {sourceFile}, Source Rank: {sourceRank}");
-                    var source = new ChessCoordinate(sourceFile, sourceRank);
-
-                    var destinationFileRank = string.Empty;
-
-                    while (destinationFileRank == null || destinationFileRank.Length != 2)
+                    else
                     {
-                        Console.Write("Destination File/Rank: ");
-                        destinationFileRank = Console.ReadLine();
+                        var randomSodaAI = new RandomSodaAI(arbitrator);
+                        previousAIMove = randomSodaAI.FindMoveForCurrentPlayer();
+                        source = previousAIMove.Source;
+                        destination = previousAIMove.Destination;
+                        Console.WriteLine($"{arbitrator.CurrentPlayerSide} moved {source} to {destination}");
                     }
-
-                    var destinationFile = destinationFileRank.Substring(0, 1).ToUpperInvariant();
-                    var destinationRank = destinationFileRank.Substring(1, 1);
-                    Console.WriteLine($"Source File: {destinationFile}, Source Rank: {destinationRank}");
-                    var destination = new ChessCoordinate(destinationFile, destinationRank);
+                    
 
                     lastResult = arbitrator.MakeMove(source, destination);
                 }
@@ -103,10 +93,72 @@ namespace ConsoleChess
                 _ => "Unknown end state"
             });
             Console.WriteLine("Final game board: ");
-            DisplayBoard(arbitrator);
+            DisplayBoard();
         }
 
-        private static void DisplayBoard(ChessBoardArbitrator arbitrator)
+        private (ChessCoordinate source, ChessCoordinate destination) GetHumanMove()
+        {
+            Console.WriteLine($"{arbitrator.CurrentPlayerSide}, please enter your move.");
+            var sourceFileRank = string.Empty;
+
+            while (sourceFileRank == null || sourceFileRank.Length != 2)
+            {
+                Console.Write("Source File/Rank: ");
+                sourceFileRank = Console.ReadLine();
+            }
+
+            var sourceFile = sourceFileRank.Substring(0, 1).ToUpperInvariant();
+            var sourceRank = sourceFileRank.Substring(1, 1);
+            Console.WriteLine($"Source File: {sourceFile}, Source Rank: {sourceRank}");
+            var source = new ChessCoordinate(sourceFile, sourceRank);
+            var destinationFileRank = string.Empty;
+
+            while (destinationFileRank == null || destinationFileRank.Length != 2)
+            {
+                Console.Write("Destination File/Rank: ");
+                destinationFileRank = Console.ReadLine();
+            }
+
+            var destinationFile = destinationFileRank.Substring(0, 1).ToUpperInvariant();
+            var destinationRank = destinationFileRank.Substring(1, 1);
+            Console.WriteLine($"Source File: {destinationFile}, Source Rank: {destinationRank}");
+            var destination = new ChessCoordinate(destinationFile, destinationRank);
+
+            return (source, destination);
+        }
+
+        private PieceType GetHumanPiecePromotion()
+        {
+            while (true)
+            {
+                Console.WriteLine($"{arbitrator.CurrentPlayerSide}, should the piece be promoted to (Q)ueen, " +
+                                                    "(B)ishop, (K)night, or (R)ook? ");
+                var promotionIdentifier = Console.ReadLine();
+
+                promotionIdentifier ??= string.Empty;
+
+                switch (promotionIdentifier.ToUpperInvariant())
+                {
+                    case "Q":
+                        return PieceType.Queen;
+
+                    case "B":
+                        return PieceType.Bishop;
+
+                    case "K":
+                        return PieceType.Knight;
+
+                    case "R":
+                        return PieceType.Rook;
+
+                    default:
+                        Console.WriteLine("Invalid input.");
+                        break;
+                };
+            }
+        }
+
+        private void DisplayBoard()
         {
             var squareIsWhite = true;
 
@@ -118,7 +170,7 @@ namespace ConsoleChess
             }
             Console.WriteLine();
 
-            for(var rankIndex = Coordinates.Ranks.Length - 1; rankIndex >= 0; rankIndex--)
+            for (var rankIndex = Coordinates.Ranks.Length - 1; rankIndex >= 0; rankIndex--)
             {
                 var rank = Coordinates.Ranks[rankIndex];
                 Console.Write($"{rank} ");
@@ -186,6 +238,38 @@ namespace ConsoleChess
                 PieceType.Rook => "R",
                 _ => "?"
             };
+        }
+
+        private void ConfigurePlayers()
+        {
+            string? input;
+            do
+            {
+                Console.Write("White is a (H)uman or (C)omputer? ");
+                input = Console.ReadLine();
+
+                input = input == null ? string.Empty : input.ToUpperInvariant();
+
+            } while (input != "H" && input != "C");
+
+            WhiteIsHuman = input == "H";
+
+            do
+            {
+                Console.Write("Black is a (H)uman or (C)omputer? ");
+                input = Console.ReadLine();
+
+                input = input == null ? string.Empty : input.ToUpperInvariant();
+
+            } while (input != "H" && input != "C");
+
+            BlackIsHuman = input == "H";
+        }
+
+        private bool CurrentPlayerIsHuman()
+        {
+            return (arbitrator.CurrentPlayerSide == SideType.White && WhiteIsHuman) ||
+                   (arbitrator.CurrentPlayerSide == SideType.Black && BlackIsHuman);
         }
     }
 }
