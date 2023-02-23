@@ -1,6 +1,7 @@
 ﻿using SodaChess;
 using SodaChess.Pieces;
 using SodaChessTests.BaseTestLogic;
+using System;
 
 namespace SodaChessTests
 {
@@ -589,6 +590,58 @@ namespace SodaChessTests
             var result = arbitrator.MakeMove(new ChessCoordinate("B", "1"), new ChessCoordinate("C", "3"));
 
             Assert.AreEqual(MoveResult.Valid, result);
+        }
+
+        [TestMethod]
+        public void GivenArbitrator_WhenNewArbitratorCreated_ThenSideValuesAreCorrect()
+        {
+            var arbitrator = new ChessBoardArbitrator();
+
+            Assert.AreEqual(39, arbitrator.BlackValue);
+            Assert.AreEqual(39, arbitrator.WhiteValue);
+        }
+
+        [TestMethod]
+        public void GivenArbitrator_WhenMoveWithNoCapture_ThenSideValuesRemainUnchanged()
+        {
+            var arbitrator = new ChessBoardArbitrator();
+
+            MakeMoves(arbitrator, "E2", "E4");
+
+            Assert.AreEqual(39, arbitrator.BlackValue);
+            Assert.AreEqual(39, arbitrator.WhiteValue);
+        }
+
+        [TestMethod]
+        public void GivenArbitrator_WhenCaptureOccurs_ThenSideValuesUpdateAccording()
+        {
+            var board = new ChessBoard();
+            board.SetPiece(new ChessCoordinate("E", "1"), new ChessPiece(PieceType.King, SideType.White));
+            board.SetPiece(new ChessCoordinate("E", "4"), new ChessPiece(PieceType.Pawn, SideType.White));
+            board.SetPiece(new ChessCoordinate("E", "8"), new ChessPiece(PieceType.King, SideType.Black));
+            board.SetPiece(new ChessCoordinate("D", "5"), new ChessPiece(PieceType.Pawn, SideType.Black));
+            var arbitrator = new ChessBoardArbitrator(board, SideType.White);
+
+            MakeMoves(arbitrator, "E4", "D5");
+
+            Assert.AreEqual(0, arbitrator.BlackValue);
+            Assert.AreEqual(1, arbitrator.WhiteValue);
+        }
+
+        [TestMethod]
+        public void GivenArbitrator_WhenPawnPromotionOccurs_ThenSideValueIs9()
+        {
+            var board = new ChessBoard();
+            board.SetPiece(new ChessCoordinate("E", "1"), new ChessPiece(PieceType.King, SideType.White));
+            board.SetPiece(new ChessCoordinate("A", "7"), new ChessPiece(PieceType.Pawn, SideType.White));
+            board.SetPiece(new ChessCoordinate("E", "8"), new ChessPiece(PieceType.King, SideType.Black));
+            var arbitrator = new ChessBoardArbitrator(board, SideType.White);
+
+            arbitrator.MakeMove(new ChessCoordinate("A", "7"), new ChessCoordinate("A", "8"));
+            arbitrator.PromotePiece(PieceType.Queen);
+
+            Assert.AreEqual(0, arbitrator.BlackValue);
+            Assert.AreEqual(9, arbitrator.WhiteValue);
         }
     }
 }

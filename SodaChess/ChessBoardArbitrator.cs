@@ -14,8 +14,8 @@ namespace SodaChess
         public IList<ChessPiece> CapturedBlackPieces { get; private set; }
         public IList<ChessPiece> CapturedWhitePieces { get; private set; }
 
-        public int CapturedBlackPiecesValue => CapturedBlackPieces.Sum(p => p.Value);
-        public int CapturedWhitePiecesValue => CapturedWhitePieces.Sum(p => p.Value);
+        public int BlackValue { get; private set; }
+        public int WhiteValue { get; private set; }
 
         private ChessCoordinate? coordinateReadyForPromotion = null;
 
@@ -32,6 +32,7 @@ namespace SodaChess
         {
             board = new ChessBoard();
             InitializeBoard();
+            RecalculateSideValues();
             CurrentPlayerSide = SideType.White;
             CapturedBlackPieces = new List<ChessPiece>();
             CapturedWhitePieces = new List<ChessPiece>();
@@ -40,6 +41,7 @@ namespace SodaChess
         public ChessBoardArbitrator(ChessBoard board, SideType currentPlayerSide)
         {
             this.board = board;
+            RecalculateSideValues();
             CurrentPlayerSide = currentPlayerSide;
             CapturedBlackPieces = new List<ChessPiece>();
             CapturedWhitePieces = new List<ChessPiece>();
@@ -62,9 +64,11 @@ namespace SodaChess
             blackKingMoved = source.blackKingMoved;
             h8RookMoved = source.h8RookMoved;
             movesSincePawnOrCapture = source.movesSincePawnOrCapture;
+            BlackValue = source.BlackValue;
+            WhiteValue = source.WhiteValue;
         }
 
-        public void InitializeBoard()
+        private void InitializeBoard()
         {
             board.SetPiece(new ChessCoordinate("A", "8"), new ChessPiece(PieceType.Rook, SideType.Black));
             board.SetPiece(new ChessCoordinate("B", "8"), new ChessPiece(PieceType.Knight, SideType.Black));
@@ -99,6 +103,35 @@ namespace SodaChess
             board.SetPiece(new ChessCoordinate("F", "1"), new ChessPiece(PieceType.Bishop, SideType.White));
             board.SetPiece(new ChessCoordinate("G", "1"), new ChessPiece(PieceType.Knight, SideType.White));
             board.SetPiece(new ChessCoordinate("H", "1"), new ChessPiece(PieceType.Rook, SideType.White));
+        }
+
+        private void RecalculateSideValues()
+        {
+            BlackValue = 0;
+            WhiteValue = 0;
+
+            foreach (var file in Coordinates.Files)
+            {
+                foreach (var rank in Coordinates.Ranks)
+                {
+                    var coordinate = new ChessCoordinate(file, rank);
+                    var piece = GetPiece(coordinate);
+
+                    if(piece == null)
+                    {
+                        continue;
+                    }
+
+                    if(piece.SideType == SideType.Black)
+                    {
+                        BlackValue += piece.Value;
+                    }
+                    else
+                    {
+                        WhiteValue += piece.Value;
+                    }
+                }
+            }
         }
 
         public MoveResult MakeMove(ChessCoordinate source, ChessCoordinate destination)
@@ -383,6 +416,9 @@ namespace SodaChess
                 SideType.Black => SideType.White,
                 _ => throw new NotImplementedException()
             };
+
+            // Update values of each side
+            RecalculateSideValues();
 
             // Calculate board state
             var inCheck = IsPlayerInCheck(board, CurrentPlayerSide);
