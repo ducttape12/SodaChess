@@ -6,32 +6,54 @@ namespace BatchChess
     public class ChessRunner
     {
         private ChessBoardArbitrator arbitrator;
+        public MoveResult Result { get; private set; } = MoveResult.InvalidNoMoveMade;
+        public bool BlackQueenSideCastlePerformed { get; private set; }
+        public bool BlackKingSideCastlePerformed { get; private set; }
+        public bool WhiteQueenSideCastlePerformed { get; private set; }
+        public bool WhiteKingSideCastlePerformed { get; private set; }
 
         public ChessRunner()
         {
             arbitrator = new ChessBoardArbitrator();
         }
 
-        public MoveResult Run()
+        public void Run()
         {
-            var lastResult = MoveResult.Valid;
-
             do
             {
                 var randomSodaAI = new RandomSodaAI(arbitrator);
                 var aiMove = randomSodaAI.FindMoveForCurrentPlayer();
-                lastResult = arbitrator.MakeMove(aiMove.Source, aiMove.Destination);
+                Result = arbitrator.MakeMove(aiMove.Source, aiMove.Destination);
 
-                if(lastResult == MoveResult.PromotionInputNeeded)
+                if (aiMove.Source.File == "E" && aiMove.Source.Rank == "1" &&
+                    aiMove.Destination.File == "C" && aiMove.Source.Rank == "1")
                 {
-                    lastResult = arbitrator.PromotePiece(aiMove.Promotion.Value);
+                    WhiteQueenSideCastlePerformed = true;
+                }
+                if (aiMove.Source.File == "E" && aiMove.Source.Rank == "1" &&
+                    aiMove.Destination.File == "G" && aiMove.Source.Rank == "1")
+                {
+                    WhiteKingSideCastlePerformed = true;
+                }
+                if (aiMove.Source.File == "E" && aiMove.Source.Rank == "8" &&
+                    aiMove.Destination.File == "C" && aiMove.Source.Rank == "8")
+                {
+                    BlackQueenSideCastlePerformed = true;
+                }
+                if (aiMove.Source.File == "E" && aiMove.Source.Rank == "8" &&
+                    aiMove.Destination.File == "G" && aiMove.Source.Rank == "8")
+                {
+                    BlackKingSideCastlePerformed = true;
                 }
 
-            } while (lastResult != MoveResult.ValidStalemate &&
-                     lastResult != MoveResult.ValidBlackInCheckmate &&
-                     lastResult != MoveResult.ValidWhiteInCheckmate);
+                if (Result == MoveResult.PromotionInputNeeded)
+                {
+                    Result = arbitrator.PromotePiece(aiMove.Promotion.Value);
+                }
 
-            return lastResult;
+            } while (Result != MoveResult.ValidStalemate &&
+                     Result != MoveResult.ValidBlackInCheckmate &&
+                     Result != MoveResult.ValidWhiteInCheckmate);
         }
     }
 }

@@ -14,10 +14,15 @@ namespace SodaAI.AI
 
         public AIMove FindMoveForCurrentPlayer()
         {
-            var pieceCoordinates = GetCoordinatesOfCurrentPlayerPieces(arbitrator);
+            var pieceCoordinates = GetCoordinatesOfCurrentPlayerPieces();
 
-            var validMoves = FindAllValidMoves(pieceCoordinates);
-            // TODO: Adding castling support
+            var validMoves = FindAllNonCastlingValidMoves(pieceCoordinates);
+
+            var possibleKingCoordinate = arbitrator.CurrentPlayerSide == SideType.White ?
+                new ChessCoordinate("E", "1") : new ChessCoordinate("E", "8");
+            var validCastlingMoves = FindAllValidCastlingMoves(possibleKingCoordinate);
+
+            validMoves.AddRange(validCastlingMoves);            
 
             var random = new Random();
             var randomIndex = random.Next(0, validMoves.Count);
@@ -26,7 +31,7 @@ namespace SodaAI.AI
             return randomMove;
         }
 
-        private IList<AIMove> FindAllValidMoves(IEnumerable<ChessCoordinate> pieceCoordinates)
+        private List<AIMove> FindAllNonCastlingValidMoves(IEnumerable<ChessCoordinate> pieceCoordinates)
         {
             var possibleMoves = new List<AIMove>();
 
@@ -41,11 +46,11 @@ namespace SodaAI.AI
                     var result = arbitratorCopy.MakeMove(source, destination);
 
                     if (result == MoveResult.Valid ||
-                       result == MoveResult.ValidBlackInCheck ||
-                       result == MoveResult.ValidWhiteInCheck ||
-                       result == MoveResult.ValidBlackInCheckmate ||
-                       result == MoveResult.ValidWhiteInCheckmate ||
-                       result == MoveResult.ValidStalemate)
+                        result == MoveResult.ValidBlackInCheck ||
+                        result == MoveResult.ValidWhiteInCheck ||
+                        result == MoveResult.ValidBlackInCheckmate ||
+                        result == MoveResult.ValidWhiteInCheckmate ||
+                        result == MoveResult.ValidStalemate)
                     {
                         possibleMoves.Add(new AIMove(source, destination));
                     }
@@ -55,25 +60,12 @@ namespace SodaAI.AI
                         possibleMoves.Add(new AIMove(source, destination, PieceType.Queen));
                     }
                 }
-
-                // Castling check
-                //var sourcePiece = arbitrator.GetPiece(source);
-
-                //if(arbitrator.CurrentPlayerSide == SideType.White &&
-                //    source.Rank == "E" && source.File == "1" &&
-                //    sourcePiece != null &&
-                //    sourcePiece.PieceType == PieceType.King)
-                //{
-                //    var arbitratorCopy = new ChessBoardArbitrator(arbitrator);
-
-
-                //}
             }
 
             return possibleMoves;
         }
 
-        private static IEnumerable<ChessCoordinate> GetCoordinatesOfCurrentPlayerPieces(ChessBoardArbitrator arbitrator)
+        private IEnumerable<ChessCoordinate> GetCoordinatesOfCurrentPlayerPieces()
         {
             foreach (var file in Coordinates.Files)
             {
@@ -89,6 +81,47 @@ namespace SodaAI.AI
                     }
                 }
             }
+        }
+
+        private IList<AIMove> FindAllValidCastlingMoves(ChessCoordinate kingCoordinate)
+        {
+            var validMoves = new List<AIMove>();
+
+            var kingPiece = arbitrator.GetPiece(kingCoordinate);
+
+            if (kingPiece == null ||
+                (kingPiece.PieceType != PieceType.King && kingPiece.SideType != SideType.White))
+            {
+                return validMoves;
+            }
+
+            var queenSideCoordinate = new ChessCoordinate("C", kingCoordinate.Rank);
+            if (AttemptCastle(kingCoordinate, queenSideCoordinate))
+            {
+                validMoves.Add(new AIMove(kingCoordinate, queenSideCoordinate));
+            }
+
+            var kingSideCoordinate = new ChessCoordinate("G", kingCoordinate.Rank);
+            if (AttemptCastle(kingCoordinate, kingSideCoordinate))
+            {
+                validMoves.Add(new AIMove(kingCoordinate, kingSideCoordinate));
+            }
+
+            return validMoves;
+        }
+
+        private bool AttemptCastle(ChessCoordinate kingSource, ChessCoordinate kingDestination)
+        {
+            var arbitratorCopy = new ChessBoardArbitrator(arbitrator);
+            var result = arbitratorCopy.MakeMove(kingSource, kingDestination);
+
+            // Don't need to check side type since a player cannot put themselves into check or checkmate,
+            // so their side result will never happen from a castle
+            return result == MoveResult.Valid ||
+                   result == MoveResult.ValidWhiteInCheck ||
+                   result == MoveResult.ValidWhiteInCheckmate ||
+                   result == MoveResult.ValidBlackInCheck ||
+                   result == MoveResult.ValidBlackInCheckmate;
         }
     }
 }
