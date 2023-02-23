@@ -9,7 +9,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SodaChess", "SodaChess\Soda
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SodaChessTests", "SodaChessTests\SodaChessTests.csproj", "{EB7D1456-E4AF-4F1A-96B3-C7AF5B822AAF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SodaAI", "SodaAI\SodaAI.csproj", "{13C67C0A-95FA-4C6A-9940-5ECD88CC0593}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SodaAI", "SodaAI\SodaAI.csproj", "{13C67C0A-95FA-4C6A-9940-5ECD88CC0593}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BatchChess", "BatchChess\BatchChess.csproj", "{295009D7-2E79-4EBF-90F9-E9F4FB9D846E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{13C67C0A-95FA-4C6A-9940-5ECD88CC0593}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{13C67C0A-95FA-4C6A-9940-5ECD88CC0593}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{13C67C0A-95FA-4C6A-9940-5ECD88CC0593}.Release|Any CPU.Build.0 = Release|Any CPU
+		{295009D7-2E79-4EBF-90F9-E9F4FB9D846E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{295009D7-2E79-4EBF-90F9-E9F4FB9D846E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{295009D7-2E79-4EBF-90F9-E9F4FB9D846E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{295009D7-2E79-4EBF-90F9-E9F4FB9D846E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
