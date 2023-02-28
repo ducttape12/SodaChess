@@ -1,5 +1,4 @@
 ﻿using SodaAI;
-using SodaAI.AI;
 using SodaChess;
 using SodaChess.Pieces;
 
@@ -7,60 +6,61 @@ namespace BatchChess
 {
     public class ChessRunner
     {
-        private ChessBoardArbitrator arbitrator;
-        public MoveResult Result { get; private set; } = MoveResult.InvalidNoMoveMade;
-        public bool BlackQueenSideCastlePerformed { get; private set; }
-        public bool BlackKingSideCastlePerformed { get; private set; }
-        public bool WhiteQueenSideCastlePerformed { get; private set; }
-        public bool WhiteKingSideCastlePerformed { get; private set; }
+        private readonly ChessBoardArbitrator arbitrator;
+        private readonly ISodaAI controlAI;
+        private readonly SideType controlSideType;
+        private readonly ISodaAI treatmentAI;
 
-        public ChessRunner()
+        public ChessRunner(ISodaAI control, ISodaAI treatment)
         {
             arbitrator = new ChessBoardArbitrator();
+            controlAI = control;
+            treatmentAI = treatment;
+
+            var random = new Random();
+            controlSideType = random.Next(0, 2) == 0 ? SideType.White : SideType.Black;
         }
 
-        public void Run()
+        public ChessRunnerResults Run()
         {
+            MoveResult result;
             do
             {
-                var ai = GetAI();
-                var aiMove = ai.GetMoveForCurrentPlayer();
-                Result = arbitrator.MakeMove(aiMove.Source, aiMove.Destination);
+                var ai = GetCurrentPlayerAI();
+                var aiMove = ai.GetMoveForCurrentPlayer(arbitrator);
+                result = arbitrator.MakeMove(aiMove.Source, aiMove.Destination);
 
-                if (aiMove.Source.File == "E" && aiMove.Source.Rank == "1" &&
-                    aiMove.Destination.File == "C" && aiMove.Source.Rank == "1")
+                if (result == MoveResult.PromotionInputNeeded)
                 {
-                    WhiteQueenSideCastlePerformed = true;
-                }
-                if (aiMove.Source.File == "E" && aiMove.Source.Rank == "1" &&
-                    aiMove.Destination.File == "G" && aiMove.Source.Rank == "1")
-                {
-                    WhiteKingSideCastlePerformed = true;
-                }
-                if (aiMove.Source.File == "E" && aiMove.Source.Rank == "8" &&
-                    aiMove.Destination.File == "C" && aiMove.Source.Rank == "8")
-                {
-                    BlackQueenSideCastlePerformed = true;
-                }
-                if (aiMove.Source.File == "E" && aiMove.Source.Rank == "8" &&
-                    aiMove.Destination.File == "G" && aiMove.Source.Rank == "8")
-                {
-                    BlackKingSideCastlePerformed = true;
+                    result = arbitrator.PromotePiece(aiMove.Promotion!.Value);
                 }
 
-                if (Result == MoveResult.PromotionInputNeeded)
-                {
-                    Result = arbitrator.PromotePiece(aiMove.Promotion.Value);
-                }
+            } while (result != MoveResult.ValidStalemate &&
+                     result != MoveResult.ValidBlackInCheckmate &&
+                     result != MoveResult.ValidWhiteInCheckmate);
 
-            } while (Result != MoveResult.ValidStalemate &&
-                     Result != MoveResult.ValidBlackInCheckmate &&
-                     Result != MoveResult.ValidWhiteInCheckmate);
+            if(result == MoveResult.ValidStalemate)
+            {
+                return ChessRunnerResults.Stalemate;
+            }
+            else if(result == MoveResult.ValidWhiteInCheckmate)
+            {
+                return controlSideType == SideType.White ? ChessRunnerResults.TreatmentAIWon : ChessRunnerResults.ControlAIWon;
+            }
+            else // ValidBlackInCheckmate
+            {
+                return controlSideType == SideType.White ? ChessRunnerResults.ControlAIWon : ChessRunnerResults.TreatmentAIWon;
+            }
         }
 
-        private ISodaAI GetAI()
+        private ISodaAI GetCurrentPlayerAI()
         {
-            return arbitrator.CurrentPlayerSide == SideType.Black ? new OneMoveAheadAI(arbitrator) : new RandomAI(arbitrator);
+            if(arbitrator.CurrentPlayerSide == controlSideType)
+            {
+                return controlAI;
+            }
+
+            return treatmentAI;
         }
     }
 }

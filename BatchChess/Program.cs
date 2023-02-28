@@ -1,70 +1,55 @@
 ﻿using BatchChess;
-using SodaChess;
+using SodaAI;
+using SodaAI.AI;
 
 public class Program
 {
-    private const int GamesToSimulate = 100;
+    private const int GamesToSimulate = 250;
+
+    private static ISodaAI ControlAI => new RandomAI();
+    private static ISodaAI TreatmentAI => new OneMoveAheadAI();
 
     public static void Main(string[] args)
     {
-        var stalemate = 0;
-        var blackInCheckmate = 0;
-        var whiteInCheckmate = 0;
-        var blackQueenSideCastlesPerformed = 0;
-        var blackKingSideCastlesPerformed = 0;
-        var whiteQueenSideCastlesPerformed = 0;
-        var whiteKingSideCastlesPerformed = 0;
+        var stalemates = 0;
+        var controlWins = 0;
+        var treatmentWins = 0;
 
         var gamesToPlay = Enumerable.Range(0, GamesToSimulate);
 
         gamesToPlay.AsParallel().ForAll(gameNumber =>
         {
-            var runner = new ChessRunner();
+            var runner = new ChessRunner(ControlAI, TreatmentAI);
             Console.WriteLine($"Playing chess game {gameNumber + 1}/{GamesToSimulate}...");
-            runner.Run();
-            Console.WriteLine($"Result of chess game {gameNumber + 1}/{GamesToSimulate}: {runner.Result}");
+            var result = runner.Run();
+            Console.WriteLine($"Result of chess game {gameNumber + 1}/{GamesToSimulate}: {result}");
 
-            switch(runner.Result)
+            switch(result)
             {
-                case MoveResult.ValidStalemate:
-                    Interlocked.Increment(ref stalemate);
+                case ChessRunnerResults.Stalemate:
+                    Interlocked.Increment(ref stalemates);
                     break;
-                case MoveResult.ValidBlackInCheckmate:
-                    Interlocked.Increment(ref blackInCheckmate);
+                case ChessRunnerResults.ControlAIWon:
+                    Interlocked.Increment(ref controlWins);
                     break;
-                case MoveResult.ValidWhiteInCheckmate:
-                    Interlocked.Increment(ref whiteInCheckmate);
+                case ChessRunnerResults.TreatmentAIWon:
+                    Interlocked.Increment(ref treatmentWins);
                     break;
                 default:
-                    throw new NotImplementedException($"Unknown result {runner.Result}");
-            }
-
-            if(runner.BlackQueenSideCastlePerformed)
-            {
-                Interlocked.Increment(ref blackQueenSideCastlesPerformed);
-            }
-            if(runner.BlackKingSideCastlePerformed)
-            {
-                Interlocked.Increment(ref blackKingSideCastlesPerformed);
-            }
-            if(runner.WhiteQueenSideCastlePerformed)
-            {
-                Interlocked.Increment(ref whiteQueenSideCastlesPerformed);
-            }
-            if(runner.WhiteKingSideCastlePerformed)
-            {
-                Interlocked.Increment(ref whiteKingSideCastlesPerformed);
+                    throw new NotImplementedException($"Unknown result {result}");
             }
         });
 
+        Console.WriteLine();
+        Console.WriteLine();
+        Console.WriteLine();
         Console.WriteLine($"Result of {GamesToSimulate} games:");
-        Console.WriteLine($"  Stalemates: {stalemate} ({PercentOfGames(stalemate)}%)");
-        Console.WriteLine($"  Black In Checkmate: {blackInCheckmate} ({PercentOfGames(blackInCheckmate)}%)");
-        Console.WriteLine($"  White In Checkmate: {whiteInCheckmate} ({PercentOfGames(whiteInCheckmate)}%)");
-        Console.WriteLine($"  Black Queen Side Castles Performed: {blackQueenSideCastlesPerformed}");
-        Console.WriteLine($"  Black King Side Castles Performed: {blackKingSideCastlesPerformed}");
-        Console.WriteLine($"  White Queen Side Castles Performed: {whiteQueenSideCastlesPerformed}");
-        Console.WriteLine($"  White King Side Castles Performed: {whiteKingSideCastlesPerformed}");
+        Console.WriteLine($"  Stalemates: {stalemates} ({PercentOfGames(stalemates)}%)");
+        Console.WriteLine($"  Control Wins: {controlWins} ({PercentOfGames(controlWins)}%)");
+        Console.WriteLine($"  Treatment Wins: {treatmentWins} ({PercentOfGames(treatmentWins)}%)");
+        Console.WriteLine();
+        Console.WriteLine($"Control: {ControlAI.GetType()}");
+        Console.WriteLine($"Treatment: {TreatmentAI.GetType()}");
     }
 
     private static decimal PercentOfGames(int games)
