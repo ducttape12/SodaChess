@@ -5,19 +5,19 @@ namespace SodaAI.AI
 {
     public class BaseAI
     {
-        private readonly ChessBoardArbitrator arbitrator;
+        private ChessBoardArbitrator Arbitrator { get; set; }
 
-        public BaseAI(ChessBoardArbitrator arbitrator)
+        protected void Initialize(ChessBoardArbitrator arbitrator)
         {
-            this.arbitrator = arbitrator;
+            Arbitrator = arbitrator;
         }
 
-        protected MoveResult OpponentCheckmate => arbitrator.CurrentPlayerSide == SideType.White ?
+        protected MoveResult OpponentCheckmate => Arbitrator.CurrentPlayerSide == SideType.White ?
             MoveResult.ValidBlackInCheckmate : MoveResult.ValidWhiteInCheckmate;
 
         protected int CurrentPlayerDelta(AIMoveWithBoardState move)
         {
-            if(arbitrator.CurrentPlayerSide == SideType.White)
+            if(Arbitrator.CurrentPlayerSide == SideType.White)
             {
                 return move.WhiteToBlackDelta;
             }
@@ -31,7 +31,7 @@ namespace SodaAI.AI
 
             var validMoves = FindAllNonCastlingValidMoves(pieceCoordinates);
 
-            var possibleKingCoordinate = arbitrator.CurrentPlayerSide == SideType.White ?
+            var possibleKingCoordinate = Arbitrator.CurrentPlayerSide == SideType.White ?
                 new ChessCoordinate("E", "1") : new ChessCoordinate("E", "8");
             var validCastlingMoves = FindAllValidCastlingMoves(possibleKingCoordinate);
 
@@ -46,11 +46,11 @@ namespace SodaAI.AI
 
             foreach (var source in pieceCoordinates)
             {
-                var destinations = arbitrator.ValidMoves(source);
+                var destinations = Arbitrator.ValidMoves(source);
 
                 foreach (var destination in destinations)
                 {
-                    var arbitratorCopy = new ChessBoardArbitrator(arbitrator);
+                    var arbitratorCopy = new ChessBoardArbitrator(Arbitrator);
 
                     var result = arbitratorCopy.MakeMove(source, destination);
 
@@ -83,9 +83,9 @@ namespace SodaAI.AI
                 {
                     var coordinate = new ChessCoordinate(file, rank);
 
-                    var piece = arbitrator.GetPiece(coordinate);
+                    var piece = Arbitrator.GetPiece(coordinate);
 
-                    if (piece != null && piece.SideType == arbitrator.CurrentPlayerSide)
+                    if (piece != null && piece.SideType == Arbitrator.CurrentPlayerSide)
                     {
                         yield return coordinate;
                     }
@@ -97,7 +97,7 @@ namespace SodaAI.AI
         {
             var validMoves = new List<AIMoveWithBoardState>();
 
-            var kingPiece = arbitrator.GetPiece(kingCoordinate);
+            var kingPiece = Arbitrator.GetPiece(kingCoordinate);
 
             if (kingPiece == null ||
                 (kingPiece.PieceType != PieceType.King && kingPiece.SideType != SideType.White))
@@ -126,7 +126,7 @@ namespace SodaAI.AI
 
         private AIMoveWithBoardState? AttemptCastle(ChessCoordinate kingSource, ChessCoordinate kingDestination)
         {
-            var arbitratorCopy = new ChessBoardArbitrator(arbitrator);
+            var arbitratorCopy = new ChessBoardArbitrator(Arbitrator);
             var result = arbitratorCopy.MakeMove(kingSource, kingDestination);
 
             // Will never get any other invalid results

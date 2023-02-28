@@ -16,8 +16,11 @@ namespace ConsoleChess
 
         private const int MillisecondsSleepBetweenComputerMoves = 1000;
 
-        private PlayerType whitePlayerType;
-        private PlayerType blackPlayerType;
+        private ISodaAI? whiteAI;
+        private ISodaAI? blackAI;
+
+        private ISodaAI? CurrentPlayerAI => arbitrator.CurrentPlayerSide == SideType.White ? whiteAI : blackAI;
+        private bool CurrentPlayerIsAI => CurrentPlayerAI != null;
 
         private readonly ChessBoardArbitrator arbitrator;
 
@@ -31,7 +34,7 @@ namespace ConsoleChess
             ConfigurePlayers();
 
             var lastResult = MoveResult.Valid;
-            AIMove previousAIMove = null;
+            AIMove previousAIMove = null!;
 
             do
             {
@@ -39,13 +42,13 @@ namespace ConsoleChess
                 {
                     PieceType promotionTarget;
 
-                    if (CurrentPlayerIsHuman())
+                    if (CurrentPlayerAI == null)
                     {
                         promotionTarget = GetHumanPiecePromotion();
                     }
                     else
                     {
-                        promotionTarget = previousAIMove.Promotion.Value;
+                        promotionTarget = previousAIMove.Promotion!.Value;
                     }
 
                     lastResult = arbitrator.PromotePiece(promotionTarget);
@@ -55,16 +58,23 @@ namespace ConsoleChess
                 {
                     DisplayBoard();
                     ChessCoordinate source, destination;
-                    if (CurrentPlayerIsHuman())
+
+                    if (CurrentPlayerAI == null)
                     {
                         (source, destination) = GetHumanMove();
                     }
                     else
                     {
-                        var ai = GetSodaAI();
-                        previousAIMove = ai.GetMoveForCurrentPlayer();
+                        previousAIMove = CurrentPlayerAI.GetMoveForCurrentPlayer(arbitrator);
                         source = previousAIMove.Source;
                         destination = previousAIMove.Destination;
+
+                        if (CurrentPlayerIsAI)
+                        {
+                            Console.WriteLine($"{arbitrator.CurrentPlayerSide} is thinking...");
+                            Thread.Sleep(MillisecondsSleepBetweenComputerMoves);
+                        }
+
                         Console.WriteLine($"{arbitrator.CurrentPlayerSide} moved {source} to {destination}");
                     }
 
@@ -75,11 +85,6 @@ namespace ConsoleChess
                 Console.WriteLine();
                 Console.WriteLine($"Move result: {lastResult}");
                 Console.WriteLine();
-
-                if (BothPlayersAreComputer())
-                {
-                    Thread.Sleep(MillisecondsSleepBetweenComputerMoves);
-                }
 
             } while (lastResult != MoveResult.ValidStalemate &&
                      lastResult != MoveResult.ValidBlackInCheckmate &&
@@ -100,32 +105,41 @@ namespace ConsoleChess
         private (ChessCoordinate source, ChessCoordinate destination) GetHumanMove()
         {
             Console.WriteLine($"{arbitrator.CurrentPlayerSide}, please enter your move.");
-            var sourceFileRank = string.Empty;
-
-            while (sourceFileRank == null || sourceFileRank.Length != 2)
-            {
-                Console.Write("Source File/Rank: ");
-                sourceFileRank = Console.ReadLine();
-            }
-
-            var sourceFile = sourceFileRank.Substring(0, 1).ToUpperInvariant();
-            var sourceRank = sourceFileRank.Substring(1, 1);
-            Console.WriteLine($"Source File: {sourceFile}, Source Rank: {sourceRank}");
-            var source = new ChessCoordinate(sourceFile, sourceRank);
-            var destinationFileRank = string.Empty;
-
-            while (destinationFileRank == null || destinationFileRank.Length != 2)
-            {
-                Console.Write("Destination File/Rank: ");
-                destinationFileRank = Console.ReadLine();
-            }
-
-            var destinationFile = destinationFileRank.Substring(0, 1).ToUpperInvariant();
-            var destinationRank = destinationFileRank.Substring(1, 1);
-            Console.WriteLine($"Source File: {destinationFile}, Source Rank: {destinationRank}");
-            var destination = new ChessCoordinate(destinationFile, destinationRank);
+            var source = GetCoordinate("Source");
+            var destination = GetCoordinate("Destination");
 
             return (source, destination);
+        }
+
+        private static ChessCoordinate GetCoordinate(string description)
+        {
+            ChessCoordinate? coordinate = null;
+
+            do
+            {
+                Console.Write($"{description} File/Rank (eg 'A1'): ");
+                var fileRank = Console.ReadLine();
+
+                if (fileRank == null || fileRank.Length != 2)
+                {
+                    Console.WriteLine("Invalid input.");
+                    continue;
+                }
+
+                try
+                {
+                    var file = fileRank![..1].ToUpperInvariant();
+                    var rank = fileRank.Substring(1, 1);
+                    coordinate = new ChessCoordinate(file, rank);
+                }
+                catch
+                {
+                    Console.WriteLine("Invalid input.");
+                }
+
+            } while (coordinate == null);
+
+            return coordinate;
         }
 
         private PieceType GetHumanPiecePromotion()
@@ -243,63 +257,35 @@ namespace ConsoleChess
 
         private void ConfigurePlayers()
         {
-            string? input;
-            do
+            whiteAI = GetPlayerType(SideType.White);
+            blackAI = GetPlayerType(SideType.Black);
+        }
+
+        private static ISodaAI? GetPlayerType(SideType sideType)
+        {
+            while (true)
             {
-                Console.Write("White is a (H)uman, (R)andom computer, or (1) move ahead computer? ");
-                input = Console.ReadLine();
+                Console.Write($"Is {sideType} a (H)uman, (R)andom computer, or (1) move ahead computer? ");
+                var input = Console.ReadLine();
 
                 input = input == null ? string.Empty : input.ToUpperInvariant();
 
-            } while (input != "H" && input != "R" && input != "1");
+                switch (input)
+                {
+                    case "H":
+                        return null;
 
-            whitePlayerType = input switch
-            {
-                "H" => PlayerType.Human,
-                "R" => PlayerType.RandomAI,
-                "1" => PlayerType.OneMoveAheadAI,
-                _ => throw new NotImplementedException($"Unknown player type {input}")
-            };
+                    case "R":
+                        return new RandomAI();
 
-            do
-            {
-                Console.Write("Black is a (H)uman, (R)andom computer, or (1) move ahead computer? ");
-                input = Console.ReadLine();
+                    case "1":
+                        return new OneMoveAheadAI();
 
-                input = input == null ? string.Empty : input.ToUpperInvariant();
-
-            } while (input != "H" && input != "R" && input != "1");
-
-            blackPlayerType = input switch
-            {
-                "H" => PlayerType.Human,
-                "R" => PlayerType.RandomAI,
-                "1" => PlayerType.OneMoveAheadAI,
-                _ => throw new NotImplementedException($"Unknown player type {input}")
-            };
-        }
-
-        private bool CurrentPlayerIsHuman()
-        {
-            return (arbitrator.CurrentPlayerSide == SideType.White && whitePlayerType == PlayerType.Human) ||
-                   (arbitrator.CurrentPlayerSide == SideType.Black && blackPlayerType == PlayerType.Human);
-        }
-
-        private ISodaAI GetSodaAI()
-        {
-            var playerType = arbitrator.CurrentPlayerSide == SideType.White ? whitePlayerType : blackPlayerType;
-
-            return playerType switch
-            {
-                PlayerType.RandomAI => new RandomAI(arbitrator),
-                PlayerType.OneMoveAheadAI => new OneMoveAheadAI(arbitrator),
-                _ => throw new NotImplementedException($"Unknown player type {playerType}")
-            };
-        }
-
-        private bool BothPlayersAreComputer()
-        {
-            return whitePlayerType != PlayerType.Human && blackPlayerType != PlayerType.Human;
+                    default:
+                        Console.WriteLine("Invalid input");
+                        break;
+                };
+            }
         }
     }
 }

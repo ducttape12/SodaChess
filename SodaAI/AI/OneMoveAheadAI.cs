@@ -4,12 +4,10 @@ namespace SodaAI.AI
 {
     public class OneMoveAheadAI : BaseAI, ISodaAI
     {
-        public OneMoveAheadAI(ChessBoardArbitrator arbitrator) : base(arbitrator)
+        public AIMove GetMoveForCurrentPlayer(ChessBoardArbitrator arbitrator)
         {
-        }
+            Initialize(arbitrator);
 
-        public AIMove GetMoveForCurrentPlayer()
-        {
             /*
              * The goal of this AI is as follows:
              *  1. Only look one move ahead
