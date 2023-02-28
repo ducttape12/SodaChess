@@ -14,8 +14,8 @@ namespace SodaChess
         public IList<ChessPiece> CapturedBlackPieces { get; private set; }
         public IList<ChessPiece> CapturedWhitePieces { get; private set; }
 
-        public int BlackValue { get; private set; }
-        public int WhiteValue { get; private set; }
+        public int BlackScore { get; private set; }
+        public int WhiteScore { get; private set; }
 
         private ChessCoordinate? coordinateReadyForPromotion = null;
 
@@ -64,8 +64,8 @@ namespace SodaChess
             blackKingMoved = source.blackKingMoved;
             h8RookMoved = source.h8RookMoved;
             movesSincePawnOrCapture = source.movesSincePawnOrCapture;
-            BlackValue = source.BlackValue;
-            WhiteValue = source.WhiteValue;
+            BlackScore = source.BlackScore;
+            WhiteScore = source.WhiteScore;
         }
 
         private void InitializeBoard()
@@ -107,8 +107,8 @@ namespace SodaChess
 
         private void RecalculateSideValues()
         {
-            BlackValue = 0;
-            WhiteValue = 0;
+            BlackScore = 0;
+            WhiteScore = 0;
 
             foreach (var file in Coordinates.Files)
             {
@@ -124,11 +124,11 @@ namespace SodaChess
 
                     if(piece.SideType == SideType.Black)
                     {
-                        BlackValue += piece.Value;
+                        BlackScore += piece.Value;
                     }
                     else
                     {
-                        WhiteValue += piece.Value;
+                        WhiteScore += piece.Value;
                     }
                 }
             }

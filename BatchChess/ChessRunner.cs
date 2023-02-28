@@ -1,5 +1,7 @@
-﻿using SodaAI.AI;
+﻿using SodaAI;
+using SodaAI.AI;
 using SodaChess;
+using SodaChess.Pieces;
 
 namespace BatchChess
 {
@@ -21,8 +23,8 @@ namespace BatchChess
         {
             do
             {
-                var randomSodaAI = new RandomSodaAI(arbitrator);
-                var aiMove = randomSodaAI.FindMoveForCurrentPlayer();
+                var ai = GetAI();
+                var aiMove = ai.GetMoveForCurrentPlayer();
                 Result = arbitrator.MakeMove(aiMove.Source, aiMove.Destination);
 
                 if (aiMove.Source.File == "E" && aiMove.Source.Rank == "1" &&
@@ -54,6 +56,11 @@ namespace BatchChess
             } while (Result != MoveResult.ValidStalemate &&
                      Result != MoveResult.ValidBlackInCheckmate &&
                      Result != MoveResult.ValidWhiteInCheckmate);
+        }
+
+        private ISodaAI GetAI()
+        {
+            return arbitrator.CurrentPlayerSide == SideType.Black ? new OneMoveAheadAI(arbitrator) : new RandomAI(arbitrator);
         }
     }
 }

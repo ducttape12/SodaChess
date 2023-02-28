@@ -16,10 +16,10 @@ namespace ConsoleChess
 
         private const int MillisecondsSleepBetweenComputerMoves = 1000;
 
-        private bool WhiteIsHuman = true;
-        private bool BlackIsHuman = true;
+        private PlayerType whitePlayerType;
+        private PlayerType blackPlayerType;
 
-        private ChessBoardArbitrator arbitrator;
+        private readonly ChessBoardArbitrator arbitrator;
 
         public InteractiveChess()
         {
@@ -61,8 +61,8 @@ namespace ConsoleChess
                     }
                     else
                     {
-                        var randomSodaAI = new RandomSodaAI(arbitrator);
-                        previousAIMove = randomSodaAI.FindMoveForCurrentPlayer();
+                        var ai = GetSodaAI();
+                        previousAIMove = ai.GetMoveForCurrentPlayer();
                         source = previousAIMove.Source;
                         destination = previousAIMove.Destination;
                         Console.WriteLine($"{arbitrator.CurrentPlayerSide} moved {source} to {destination}");
@@ -76,7 +76,7 @@ namespace ConsoleChess
                 Console.WriteLine($"Move result: {lastResult}");
                 Console.WriteLine();
 
-                if (!WhiteIsHuman && !BlackIsHuman)
+                if (BothPlayersAreComputer())
                 {
                     Thread.Sleep(MillisecondsSleepBetweenComputerMoves);
                 }
@@ -246,31 +246,60 @@ namespace ConsoleChess
             string? input;
             do
             {
-                Console.Write("White is a (H)uman or (C)omputer? ");
+                Console.Write("White is a (H)uman, (R)andom computer, or (1) move ahead computer? ");
                 input = Console.ReadLine();
 
                 input = input == null ? string.Empty : input.ToUpperInvariant();
 
-            } while (input != "H" && input != "C");
+            } while (input != "H" && input != "R" && input != "1");
 
-            WhiteIsHuman = input == "H";
+            whitePlayerType = input switch
+            {
+                "H" => PlayerType.Human,
+                "R" => PlayerType.RandomAI,
+                "1" => PlayerType.OneMoveAheadAI,
+                _ => throw new NotImplementedException($"Unknown player type {input}")
+            };
 
             do
             {
-                Console.Write("Black is a (H)uman or (C)omputer? ");
+                Console.Write("Black is a (H)uman, (R)andom computer, or (1) move ahead computer? ");
                 input = Console.ReadLine();
 
                 input = input == null ? string.Empty : input.ToUpperInvariant();
 
-            } while (input != "H" && input != "C");
+            } while (input != "H" && input != "R" && input != "1");
 
-            BlackIsHuman = input == "H";
+            blackPlayerType = input switch
+            {
+                "H" => PlayerType.Human,
+                "R" => PlayerType.RandomAI,
+                "1" => PlayerType.OneMoveAheadAI,
+                _ => throw new NotImplementedException($"Unknown player type {input}")
+            };
         }
 
         private bool CurrentPlayerIsHuman()
         {
-            return (arbitrator.CurrentPlayerSide == SideType.White && WhiteIsHuman) ||
-                   (arbitrator.CurrentPlayerSide == SideType.Black && BlackIsHuman);
+            return (arbitrator.CurrentPlayerSide == SideType.White && whitePlayerType == PlayerType.Human) ||
+                   (arbitrator.CurrentPlayerSide == SideType.Black && blackPlayerType == PlayerType.Human);
+        }
+
+        private ISodaAI GetSodaAI()
+        {
+            var playerType = arbitrator.CurrentPlayerSide == SideType.White ? whitePlayerType : blackPlayerType;
+
+            return playerType switch
+            {
+                PlayerType.RandomAI => new RandomAI(arbitrator),
+                PlayerType.OneMoveAheadAI => new OneMoveAheadAI(arbitrator),
+                _ => throw new NotImplementedException($"Unknown player type {playerType}")
+            };
+        }
+
+        private bool BothPlayersAreComputer()
+        {
+            return whitePlayerType != PlayerType.Human && blackPlayerType != PlayerType.Human;
         }
     }
 }

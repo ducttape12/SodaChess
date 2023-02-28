@@ -597,8 +597,8 @@ namespace SodaChessTests
         {
             var arbitrator = new ChessBoardArbitrator();
 
-            Assert.AreEqual(39, arbitrator.BlackValue);
-            Assert.AreEqual(39, arbitrator.WhiteValue);
+            Assert.AreEqual(39, arbitrator.BlackScore);
+            Assert.AreEqual(39, arbitrator.WhiteScore);
         }
 
         [TestMethod]
@@ -608,8 +608,8 @@ namespace SodaChessTests
 
             MakeMoves(arbitrator, "E2", "E4");
 
-            Assert.AreEqual(39, arbitrator.BlackValue);
-            Assert.AreEqual(39, arbitrator.WhiteValue);
+            Assert.AreEqual(39, arbitrator.BlackScore);
+            Assert.AreEqual(39, arbitrator.WhiteScore);
         }
 
         [TestMethod]
@@ -624,8 +624,8 @@ namespace SodaChessTests
 
             MakeMoves(arbitrator, "E4", "D5");
 
-            Assert.AreEqual(0, arbitrator.BlackValue);
-            Assert.AreEqual(1, arbitrator.WhiteValue);
+            Assert.AreEqual(0, arbitrator.BlackScore);
+            Assert.AreEqual(1, arbitrator.WhiteScore);
         }
 
         [TestMethod]
@@ -640,8 +640,8 @@ namespace SodaChessTests
             arbitrator.MakeMove(new ChessCoordinate("A", "7"), new ChessCoordinate("A", "8"));
             arbitrator.PromotePiece(PieceType.Queen);
 
-            Assert.AreEqual(0, arbitrator.BlackValue);
-            Assert.AreEqual(9, arbitrator.WhiteValue);
+            Assert.AreEqual(0, arbitrator.BlackScore);
+            Assert.AreEqual(9, arbitrator.WhiteScore);
         }
     }
 }

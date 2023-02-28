@@ -15,6 +15,17 @@
             _ => 0
         };
 
+        public int TrueValue => PieceType switch
+        {
+            PieceType.Pawn => 1,
+            PieceType.Knight => 3,
+            PieceType.Bishop => 3,
+            PieceType.Rook => 5,
+            PieceType.Queen => 9,
+            PieceType.King => int.MaxValue,
+            _ => int.MaxValue
+        };
+
         public ChessPiece(PieceType pieceType, SideType sideType)
         {
             PieceType = pieceType;
