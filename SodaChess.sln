@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.4.33213.308
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ConsoleChess", "ConsoleChess\ConsoleChess.csproj", "{74042AFA-AFC1-43DA-8DF8-A254F01542A8}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SodaChessConsole", "SodaChessConsole\SodaChessConsole.csproj", "{74042AFA-AFC1-43DA-8DF8-A254F01542A8}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SodaChess", "SodaChess\SodaChess.csproj", "{626860B3-D4C0-4651-8194-22114272D059}"
 EndProject
@@ -11,7 +11,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SodaChessTests", "SodaChess
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SodaAI", "SodaAI\SodaAI.csproj", "{13C67C0A-95FA-4C6A-9940-5ECD88CC0593}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BatchChess", "BatchChess\BatchChess.csproj", "{295009D7-2E79-4EBF-90F9-E9F4FB9D846E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BatchChess", "BatchChess\BatchChess.csproj", "{295009D7-2E79-4EBF-90F9-E9F4FB9D846E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
