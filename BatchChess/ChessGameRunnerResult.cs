@@ -1,6 +1,6 @@
 ﻿namespace BatchChess
 {
-    public enum ChessRunnerResults
+    public enum ChessGameRunnerResult
     {
         Stalemate,
         ControlAIWon,

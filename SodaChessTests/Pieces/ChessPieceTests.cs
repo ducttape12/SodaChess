@@ -100,5 +100,75 @@ namespace SodaChessTests.Pieces
 
             Assert.AreEqual(9, value);
         }
+
+        [TestMethod]
+        public void GivenKing_WhenValueCalled_ThenReturns0()
+        {
+            var piece = new ChessPiece(PieceType.King, SideType.Black);
+
+            var value = piece.Value;
+
+            Assert.AreEqual(0, value);
+        }
+
+        [TestMethod]
+        public void GivenPawn_WhenTrueValueCalled_ThenReturns1()
+        {
+            var piece = new ChessPiece(PieceType.Pawn, SideType.Black);
+
+            var value = piece.Value;
+
+            Assert.AreEqual(1, value);
+        }
+
+        [TestMethod]
+        public void GivenKnight_WhenTrueValueCalled_ThenReturns1()
+        {
+            var piece = new ChessPiece(PieceType.Knight, SideType.Black);
+
+            var value = piece.Value;
+
+            Assert.AreEqual(3, value);
+        }
+
+        [TestMethod]
+        public void GivenBishop_WhenTrueValueCalled_ThenReturns1()
+        {
+            var piece = new ChessPiece(PieceType.Bishop, SideType.Black);
+
+            var value = piece.Value;
+
+            Assert.AreEqual(3, value);
+        }
+
+        [TestMethod]
+        public void GivenRook_WhenTrueValueCalled_ThenReturns1()
+        {
+            var piece = new ChessPiece(PieceType.Rook, SideType.Black);
+
+            var value = piece.Value;
+
+            Assert.AreEqual(5, value);
+        }
+
+        [TestMethod]
+        public void GivenQueen_WhenTrueValueCalled_ThenReturns1()
+        {
+            var piece = new ChessPiece(PieceType.Queen, SideType.Black);
+
+            var value = piece.Value;
+
+            Assert.AreEqual(9, value);
+        }
+
+        [TestMethod]
+        public void GivenKing_WhenTrueValueCalled_ThenReturnsMaxValue()
+        {
+            var piece = new ChessPiece(PieceType.King, SideType.Black);
+
+            var value = piece.Value;
+
+            Assert.AreEqual(int.MaxValue, value);
+        }
     }
 }

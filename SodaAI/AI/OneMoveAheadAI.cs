@@ -4,6 +4,12 @@ namespace SodaAI.AI
 {
     public class OneMoveAheadAI : BaseAI, ISodaAI
     {
+        public OneMoveAheadAI() { }
+
+        public OneMoveAheadAI(bool isControl) : base(isControl)
+        {
+        }
+
         public AIMove GetMoveForCurrentPlayer(ChessBoardArbitrator arbitrator)
         {
             Initialize(arbitrator);
@@ -22,7 +28,7 @@ namespace SodaAI.AI
             // 2. Always choose a move that results in a win
             var checkmateMoves = validMoves.Where(m => m.MoveResult == OpponentCheckmate);
 
-            if(checkmateMoves.Any())
+            if (checkmateMoves.Any())
             {
                 return checkmateMoves.First();
             }
@@ -31,12 +37,14 @@ namespace SodaAI.AI
             var maximumDelta = validMoves.Max(CurrentPlayerDelta);
 
             // 4. Find the cheapest piece required to get that delta
-            // TODO: Implement this
-            //var cheapestPiece = validMoves.Where(m => CurrentPlayerDelta(m) == maximumDelta).OrderBy(m => m.)
-
+            var cheapestPiece = validMoves.Where(m => CurrentPlayerDelta(m) == maximumDelta)
+                                            .OrderBy(m => m.SourcePiece.TrueValue)
+                                            .First();
 
             // 5. Randomly select from the possible moves
-            var moves = validMoves.Where(m => CurrentPlayerDelta(m) == maximumDelta).ToList();
+            var moves = validMoves.Where(m => CurrentPlayerDelta(m) == maximumDelta &&
+                                                m.SourcePiece.PieceType == cheapestPiece.SourcePiece.PieceType)
+                                    .ToList();
             var randomMove = GetRandomMove(moves);
 
             return randomMove;

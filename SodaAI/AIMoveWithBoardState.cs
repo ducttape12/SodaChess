@@ -8,17 +8,19 @@ namespace SodaAI
         public int BlackScore { get; private set; }
         public int WhiteScore { get; private set; }
         public MoveResult MoveResult { get; private set; }
+        public ChessPiece SourcePiece { get; private set; }
 
         public int WhiteToBlackDelta => WhiteScore - BlackScore;
         public int BlackToWhiteDelta => BlackScore - WhiteScore;
 
         public AIMoveWithBoardState(ChessCoordinate source, ChessCoordinate destination, ChessBoardArbitrator arbitrator,
-            MoveResult moveResult, PieceType? promotion = null) :
+            MoveResult moveResult, ChessPiece sourcePiece, PieceType? promotion = null) :
             base(source, destination, promotion)
         {
             BlackScore = arbitrator.BlackScore;
             WhiteScore = arbitrator.WhiteScore;
             MoveResult = moveResult;
+            SourcePiece = sourcePiece;
         }
     }
 }

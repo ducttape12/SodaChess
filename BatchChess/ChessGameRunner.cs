@@ -4,14 +4,14 @@ using SodaChess.Pieces;
 
 namespace BatchChess
 {
-    public class ChessRunner
+    public class ChessGameRunner
     {
         private readonly ChessBoardArbitrator arbitrator;
         private readonly ISodaAI controlAI;
         private readonly SideType controlSideType;
         private readonly ISodaAI treatmentAI;
 
-        public ChessRunner(ISodaAI control, ISodaAI treatment)
+        public ChessGameRunner(ISodaAI control, ISodaAI treatment)
         {
             arbitrator = new ChessBoardArbitrator();
             controlAI = control;
@@ -21,7 +21,7 @@ namespace BatchChess
             controlSideType = random.Next(0, 2) == 0 ? SideType.White : SideType.Black;
         }
 
-        public ChessRunnerResults Run()
+        public ChessGameRunnerResult Run()
         {
             MoveResult result;
             do
@@ -41,15 +41,15 @@ namespace BatchChess
 
             if(result == MoveResult.ValidStalemate)
             {
-                return ChessRunnerResults.Stalemate;
+                return ChessGameRunnerResult.Stalemate;
             }
             else if(result == MoveResult.ValidWhiteInCheckmate)
             {
-                return controlSideType == SideType.White ? ChessRunnerResults.TreatmentAIWon : ChessRunnerResults.ControlAIWon;
+                return controlSideType == SideType.White ? ChessGameRunnerResult.TreatmentAIWon : ChessGameRunnerResult.ControlAIWon;
             }
             else // ValidBlackInCheckmate
             {
-                return controlSideType == SideType.White ? ChessRunnerResults.ControlAIWon : ChessRunnerResults.TreatmentAIWon;
+                return controlSideType == SideType.White ? ChessGameRunnerResult.ControlAIWon : ChessGameRunnerResult.TreatmentAIWon;
             }
         }
 

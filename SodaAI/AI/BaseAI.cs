@@ -7,6 +7,21 @@ namespace SodaAI.AI
     {
         private ChessBoardArbitrator Arbitrator { get; set; }
 
+        protected bool IsControl { get; private set; }
+        protected bool IsTreatment { get; private set; }
+
+        public BaseAI(bool isControl)
+        {
+            IsControl = isControl;
+            IsTreatment = !isControl;
+        }
+
+        public BaseAI()
+        {
+            IsControl = true;
+            IsTreatment = false;
+        }
+
         protected void Initialize(ChessBoardArbitrator arbitrator)
         {
             Arbitrator = arbitrator;
@@ -51,6 +66,7 @@ namespace SodaAI.AI
                 foreach (var destination in destinations)
                 {
                     var arbitratorCopy = new ChessBoardArbitrator(Arbitrator);
+                    var piece = arbitratorCopy.GetPiece(source); 
 
                     var result = arbitratorCopy.MakeMove(source, destination);
 
@@ -61,13 +77,13 @@ namespace SodaAI.AI
                         result == MoveResult.ValidWhiteInCheckmate ||
                         result == MoveResult.ValidStalemate)
                     {
-                        possibleMoves.Add(new AIMoveWithBoardState(source, destination, arbitratorCopy, result));
+                        possibleMoves.Add(new AIMoveWithBoardState(source, destination, arbitratorCopy, result, piece!));
                     }
 
                     if (result == MoveResult.PromotionInputNeeded)
                     {
                         // TODO: Promote to something other than queen?
-                        possibleMoves.Add(new AIMoveWithBoardState(source, destination, arbitratorCopy, result, PieceType.Queen));
+                        possibleMoves.Add(new AIMoveWithBoardState(source, destination, arbitratorCopy, result, piece!, PieceType.Queen));
                     }
                 }
             }
@@ -106,7 +122,7 @@ namespace SodaAI.AI
             }
 
             var queenSideCoordinate = new ChessCoordinate("C", kingCoordinate.Rank);
-            var queenSideCastleMove = AttemptCastle(kingCoordinate, queenSideCoordinate);
+            var queenSideCastleMove = AttemptCastle(kingPiece, kingCoordinate, queenSideCoordinate);
 
             if (queenSideCastleMove != null)
             {
@@ -114,7 +130,7 @@ namespace SodaAI.AI
             }
 
             var kingSideCoordinate = new ChessCoordinate("G", kingCoordinate.Rank);
-            var kingSideCastleMove = AttemptCastle(kingCoordinate, kingSideCoordinate);
+            var kingSideCastleMove = AttemptCastle(kingPiece, kingCoordinate, kingSideCoordinate);
 
             if(kingSideCastleMove != null)
             {
@@ -124,7 +140,7 @@ namespace SodaAI.AI
             return validMoves;
         }
 
-        private AIMoveWithBoardState? AttemptCastle(ChessCoordinate kingSource, ChessCoordinate kingDestination)
+        private AIMoveWithBoardState? AttemptCastle(ChessPiece king, ChessCoordinate kingSource, ChessCoordinate kingDestination)
         {
             var arbitratorCopy = new ChessBoardArbitrator(Arbitrator);
             var result = arbitratorCopy.MakeMove(kingSource, kingDestination);
@@ -135,16 +151,21 @@ namespace SodaAI.AI
                 return null;
             }
 
-            return new AIMoveWithBoardState(kingSource, kingDestination, arbitratorCopy, result);
+            return new AIMoveWithBoardState(kingSource, kingDestination, arbitratorCopy, result, king);
         }
 
-        protected AIMove GetRandomMove(IList<AIMoveWithBoardState> possibleMoves)
+        protected static AIMove GetRandomMove(IList<AIMoveWithBoardState> possibleMoves)
         {
             var random = new Random();
             var randomIndex = random.Next(0, possibleMoves.Count);
             var randomMove = possibleMoves[randomIndex];
 
             return randomMove;
+        }
+
+        public override string ToString()
+        {
+            return $"{this.GetType()}, IsControl? {IsControl}";
         }
     }
 }
