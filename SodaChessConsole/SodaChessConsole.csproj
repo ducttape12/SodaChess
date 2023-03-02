@@ -5,11 +5,39 @@
     <TargetFramework>net7.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <ApplicationIcon>soda.ico</ApplicationIcon>
+    <Title>Soda Chess Console</Title>
+    <Authors>Keith Ott</Authors>
+    <Company>KeithOtt.com</Company>
+    <Product>Soda Chess</Product>
+    <PackageProjectUrl>https://github.com/ducttape12/SodaChess</PackageProjectUrl>
+    <PackageIcon>soda.png</PackageIcon>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <RepositoryUrl>https://github.com/ducttape12/SodaChess</RepositoryUrl>
+    <Copyright>Copyright 2023 Keith ott</Copyright>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="soda.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\SodaAI\SodaAI.csproj" />
     <ProjectReference Include="..\SodaChess\SodaChess.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="soda.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
   </ItemGroup>
 
 </Project>
