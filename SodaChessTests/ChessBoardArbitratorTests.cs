@@ -519,9 +519,15 @@ namespace SodaChessTests
         }
 
         [TestMethod]
-        public void GivenNoPawnMovedOrPieceCapturedIn99Moves_WhenNoPawnMovedOrPieceCaptured_ThenResultIsStalemate()
+        public void GivenNoPawnMovedOrPieceCapturedIn99Moves_WhenCastleOccurs_ThenResultIsStalemate()
         {
-            var arbitrator = new ChessBoardArbitrator();
+            var board = new ChessBoard();
+            board.SetPiece(new ChessCoordinate("E", "1"), new ChessPiece(PieceType.King, SideType.White));
+            board.SetPiece(new ChessCoordinate("G", "1"), new ChessPiece(PieceType.Knight, SideType.White));
+            board.SetPiece(new ChessCoordinate("B", "8"), new ChessPiece(PieceType.Knight, SideType.Black));
+            board.SetPiece(new ChessCoordinate("E", "8"), new ChessPiece(PieceType.King, SideType.Black));
+            board.SetPiece(new ChessCoordinate("H", "8"), new ChessPiece(PieceType.Rook, SideType.Black));
+            var arbitrator = new ChessBoardArbitrator(board, SideType.White);
             for (var i = 0; i < 24; i++)
             {
                 MakeMoves(arbitrator,
@@ -537,7 +543,7 @@ namespace SodaChessTests
                     "F3", "G1"  // White knight
             );
 
-            var result = arbitrator.MakeMove(new ChessCoordinate("C", "6"), new ChessCoordinate("B", "8"));
+            var result = arbitrator.MakeMove(new ChessCoordinate("E", "8"), new ChessCoordinate("G", "8"));
 
             Assert.AreEqual(MoveResult.ValidStalemate, result);
         }
