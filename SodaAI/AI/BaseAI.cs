@@ -145,7 +145,6 @@ namespace SodaAI.AI
             var arbitratorCopy = new ChessBoardArbitrator(Arbitrator);
             var result = arbitratorCopy.MakeMove(kingSource, kingDestination);
 
-            // Will never get any other invalid results
             if (result == MoveResult.InvalidNoMoveMade)
             {
                 return null;

@@ -7,8 +7,8 @@ namespace BatchChess
     {
         private const int GamesToSimulate = 50;
 
-        private static ISodaAI ControlAI => new RandomAI();
-        private static ISodaAI TreatmentAI => new OneMoveAheadAI();
+        private static ISodaAI ControlAI => new OneMoveAheadAI();
+        private static ISodaAI TreatmentAI => new TwoMovesAheadAI();
 
         public static void Main(string[] args)
         {
