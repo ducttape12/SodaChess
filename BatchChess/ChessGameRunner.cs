@@ -17,8 +17,7 @@ namespace BatchChess
             controlAI = control;
             treatmentAI = treatment;
 
-            var random = new Random();
-            controlSideType = random.Next(0, 2) == 0 ? SideType.White : SideType.Black;
+            controlSideType = Random.Shared.Next(0, 2) == 0 ? SideType.White : SideType.Black;
         }
 
         public ChessGameRunnerResult Run()

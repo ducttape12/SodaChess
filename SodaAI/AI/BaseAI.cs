@@ -155,8 +155,7 @@ namespace SodaAI.AI
 
         protected static AIMove GetRandomMove(IList<AIMoveWithBoardState> possibleMoves)
         {
-            var random = new Random();
-            var randomIndex = random.Next(0, possibleMoves.Count);
+            var randomIndex = Random.Shared.Next(0, possibleMoves.Count);
             var randomMove = possibleMoves[randomIndex];
 
             return randomMove;
