@@ -116,7 +116,7 @@ namespace SodaChessTests.Pieces
         {
             var piece = new ChessPiece(PieceType.Pawn, SideType.Black);
 
-            var value = piece.Value;
+            var value = piece.TrueValue;
 
             Assert.AreEqual(1, value);
         }
@@ -126,7 +126,7 @@ namespace SodaChessTests.Pieces
         {
             var piece = new ChessPiece(PieceType.Knight, SideType.Black);
 
-            var value = piece.Value;
+            var value = piece.TrueValue;
 
             Assert.AreEqual(3, value);
         }
@@ -136,7 +136,7 @@ namespace SodaChessTests.Pieces
         {
             var piece = new ChessPiece(PieceType.Bishop, SideType.Black);
 
-            var value = piece.Value;
+            var value = piece.TrueValue;
 
             Assert.AreEqual(3, value);
         }
@@ -146,7 +146,7 @@ namespace SodaChessTests.Pieces
         {
             var piece = new ChessPiece(PieceType.Rook, SideType.Black);
 
-            var value = piece.Value;
+            var value = piece.TrueValue;
 
             Assert.AreEqual(5, value);
         }
@@ -156,7 +156,7 @@ namespace SodaChessTests.Pieces
         {
             var piece = new ChessPiece(PieceType.Queen, SideType.Black);
 
-            var value = piece.Value;
+            var value = piece.TrueValue;
 
             Assert.AreEqual(9, value);
         }
@@ -166,7 +166,7 @@ namespace SodaChessTests.Pieces
         {
             var piece = new ChessPiece(PieceType.King, SideType.Black);
 
-            var value = piece.Value;
+            var value = piece.TrueValue;
 
             Assert.AreEqual(int.MaxValue, value);
         }

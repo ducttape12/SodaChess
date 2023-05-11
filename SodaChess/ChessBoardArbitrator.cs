@@ -156,7 +156,7 @@ namespace SodaChess
             // If a castle was performed, then no further action is needed
             if (castlePerformed)
             {
-                movesSincePawnOrCapture = 0;
+                movesSincePawnOrCapture++;
                 return SwitchSidesAndCalculateBoardState();
             }
 
