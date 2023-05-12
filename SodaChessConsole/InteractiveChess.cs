@@ -65,15 +65,15 @@ namespace ConsoleChess
                     }
                     else
                     {
-                        previousAIMove = CurrentPlayerAI.GetMoveForCurrentPlayer(arbitrator);
-                        source = previousAIMove.Source;
-                        destination = previousAIMove.Destination;
-
                         if (CurrentPlayerIsAI)
                         {
                             Console.WriteLine($"{arbitrator.CurrentPlayerSide} is thinking...");
-                            Thread.Sleep(MillisecondsSleepBetweenComputerMoves);
+                            //Thread.Sleep(MillisecondsSleepBetweenComputerMoves);
                         }
+
+                        previousAIMove = CurrentPlayerAI.GetMoveForCurrentPlayer(arbitrator);
+                        source = previousAIMove.Source;
+                        destination = previousAIMove.Destination;
 
                         Console.WriteLine($"{arbitrator.CurrentPlayerSide} moved {source} to {destination}");
                     }
@@ -265,7 +265,7 @@ namespace ConsoleChess
         {
             while (true)
             {
-                Console.Write($"Is {sideType} a (H)uman, (R)andom computer, or (1) move ahead computer? ");
+                Console.Write($"Is {sideType} a (H)uman, (R)andom computer, (1) move ahead computer, or (N) move ahead computer? ");
                 var input = Console.ReadLine();
 
                 input = input == null ? string.Empty : input.ToUpperInvariant();
@@ -280,6 +280,9 @@ namespace ConsoleChess
 
                     case "1":
                         return new OneMoveAheadAI();
+
+                    case "N":
+                        return new NMovesAheadAI();
 
                     default:
                         Console.WriteLine("Invalid input");

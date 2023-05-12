@@ -5,10 +5,10 @@ namespace BatchChess
 {
     public class BatchChessRunner
     {
-        private const int GamesToSimulate = 50;
+        private const int GamesToSimulate = 1;
 
         private static ISodaAI ControlAI => new OneMoveAheadAI();
-        private static ISodaAI TreatmentAI => new TwoMovesAheadAI();
+        private static ISodaAI TreatmentAI => new NMovesAheadAI();
 
         public static void Main(string[] args)
         {

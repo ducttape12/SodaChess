@@ -10,7 +10,7 @@ namespace SodaAI.AI
         {
         }
 
-        public AIMove GetMoveForCurrentPlayer(ChessBoardArbitrator arbitrator)
+        public AIMoveWithBoardState GetMoveForCurrentPlayer(ChessBoardArbitrator arbitrator)
         {
             Initialize(arbitrator);
 

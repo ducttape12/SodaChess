@@ -4,6 +4,7 @@
     {
         Human,
         RandomAI,
-        OneMoveAheadAI
+        OneMoveAheadAI,
+        NMoveAheadAI
     }
 }

@@ -5,7 +5,7 @@ namespace SodaAI.AI
 {
     public class RandomAI : BaseAI, ISodaAI
     {
-        public AIMove GetMoveForCurrentPlayer(ChessBoardArbitrator arbitrator)
+        public AIMoveWithBoardState GetMoveForCurrentPlayer(ChessBoardArbitrator arbitrator)
         {
             Initialize(arbitrator);
 

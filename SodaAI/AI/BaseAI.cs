@@ -34,10 +34,10 @@ namespace SodaAI.AI
         {
             if(Arbitrator.CurrentPlayerSide == SideType.White)
             {
-                return move.WhiteToBlackDelta;
+                return move.WhiteToBlackBranchDelta;
             }
 
-            return move.BlackToWhiteDelta;
+            return move.BlackToWhiteBranchDelta;
         }
 
         protected IList<AIMoveWithBoardState> FindAllValidMoves()
@@ -68,30 +68,41 @@ namespace SodaAI.AI
                     var arbitratorCopy = new ChessBoardArbitrator(Arbitrator);
                     var piece = arbitratorCopy.GetPiece(source); 
 
-                    var result = arbitratorCopy.MakeMove(source, destination);
+                    var myMoveResult = arbitratorCopy.MakeMove(source, destination);
 
-                    if (result == MoveResult.Valid ||
-                        result == MoveResult.ValidBlackInCheck ||
-                        result == MoveResult.ValidWhiteInCheck ||
-                        result == MoveResult.ValidBlackInCheckmate ||
-                        result == MoveResult.ValidWhiteInCheckmate ||
-                        result == MoveResult.ValidStalemate)
+                    var promotionNeeded = false;
+
+                    if(myMoveResult ==MoveResult.PromotionInputNeeded)
                     {
-                        possibleMoves.Add(new AIMoveWithBoardState(source, destination, arbitratorCopy, result, piece!));
+                        promotionNeeded = true;
+
+                        myMoveResult = arbitratorCopy.PromotePiece(PieceType.Queen);
                     }
 
-                    if (result == MoveResult.PromotionInputNeeded)
+                    var blackScore = arbitratorCopy.BlackScore;
+                    var whiteScore = arbitratorCopy.WhiteScore;
+
+                    if(arbitratorCopy.CurrentPlayerSide == SideType.White && myMoveResult == MoveResult.ValidWhiteInCheckmate)
                     {
-                        // TODO: Promote to something other than queen?
-                        possibleMoves.Add(new AIMoveWithBoardState(source, destination, arbitratorCopy, result, piece!, PieceType.Queen));
+                        blackScore = int.MaxValue;
+                        whiteScore = int.MinValue;
                     }
+
+                    if(arbitratorCopy.CurrentPlayerSide == SideType.Black && myMoveResult == MoveResult.ValidBlackInCheckmate)
+                    {
+                        blackScore = int.MinValue;
+                        whiteScore = int.MaxValue;
+                    }
+
+                    possibleMoves.Add(new AIMoveWithBoardState(source, destination, blackScore, whiteScore, myMoveResult, piece!,
+                        promotionNeeded ? PieceType.Queen : null));
                 }
             }
 
             return possibleMoves;
         }
 
-        private IEnumerable<ChessCoordinate> GetCoordinatesOfCurrentPlayerPieces()
+        protected IEnumerable<ChessCoordinate> GetCoordinatesOfCurrentPlayerPieces()
         {
             foreach (var file in Coordinates.Files)
             {
@@ -150,10 +161,11 @@ namespace SodaAI.AI
                 return null;
             }
 
-            return new AIMoveWithBoardState(kingSource, kingDestination, arbitratorCopy, result, king);
+            return new AIMoveWithBoardState(kingSource, kingDestination, arbitratorCopy.BlackScore, arbitratorCopy.WhiteScore,
+                result, king);
         }
 
-        protected static AIMove GetRandomMove(IList<AIMoveWithBoardState> possibleMoves)
+        protected static AIMoveWithBoardState GetRandomMove(IList<AIMoveWithBoardState> possibleMoves)
         {
             var randomIndex = Random.Shared.Next(0, possibleMoves.Count);
             var randomMove = possibleMoves[randomIndex];
