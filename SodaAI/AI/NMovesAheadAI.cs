@@ -5,6 +5,10 @@ namespace SodaAI.AI
 {
     public class NMovesAheadAI : BaseAI, ISodaAI
     {
+        private const int MovesToLookAhead = 3;
+
+        public bool RequiresThinkingTime => true;
+
         public NMovesAheadAI() { }
 
         public NMovesAheadAI(bool isControl) : base(isControl)
@@ -187,8 +191,6 @@ namespace SodaAI.AI
                                     .ToList();
             var randomMove = GetRandomMove(moves);
 
-            Console.WriteLine($"Completed analysis at depth {lookAheadsRemaining}.");
-
             return randomMove;
         }
 
@@ -206,7 +208,7 @@ namespace SodaAI.AI
         {
             Initialize(arbitrator);
 
-            return GetMoveForCurrentPlayer(arbitrator, 3);
+            return GetMoveForCurrentPlayer(arbitrator, MovesToLookAhead);
         }
     }
 }

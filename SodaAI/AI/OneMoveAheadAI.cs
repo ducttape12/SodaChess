@@ -10,6 +10,8 @@ namespace SodaAI.AI
         {
         }
 
+        public bool RequiresThinkingTime => false;
+
         public AIMoveWithBoardState GetMoveForCurrentPlayer(ChessBoardArbitrator arbitrator)
         {
             Initialize(arbitrator);

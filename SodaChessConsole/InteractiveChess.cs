@@ -68,7 +68,10 @@ namespace ConsoleChess
                         if (CurrentPlayerIsAI)
                         {
                             Console.WriteLine($"{arbitrator.CurrentPlayerSide} is thinking...");
-                            //Thread.Sleep(MillisecondsSleepBetweenComputerMoves);
+                            if(!CurrentPlayerAI.RequiresThinkingTime)
+                            {
+                                Thread.Sleep(MillisecondsSleepBetweenComputerMoves);
+                            }
                         }
 
                         previousAIMove = CurrentPlayerAI.GetMoveForCurrentPlayer(arbitrator);
@@ -265,29 +268,39 @@ namespace ConsoleChess
         {
             while (true)
             {
-                Console.Write($"Is {sideType} a (H)uman, (R)andom computer, (1) move ahead computer, or (N) move ahead computer? ");
+                Console.WriteLine($"Is {sideType} a:");
+                Console.WriteLine("  1. Human");
+                Console.WriteLine("  2. Random moving computer");
+                Console.WriteLine("  3. Look ahead one move computer");
+                Console.WriteLine("  4. Look ahead three moves computer (WARNING: Experimental and slow)");
+                Console.Write($"{sideType} selection: ");
+
                 var input = Console.ReadLine();
+
+                Console.WriteLine();
 
                 input = input == null ? string.Empty : input.ToUpperInvariant();
 
                 switch (input)
                 {
-                    case "H":
+                    case "1":
                         return null;
 
-                    case "R":
+                    case "2":
                         return new RandomAI();
 
-                    case "1":
+                    case "3":
                         return new OneMoveAheadAI();
 
-                    case "N":
+                    case "4":
                         return new NMovesAheadAI();
 
                     default:
                         Console.WriteLine("Invalid input");
                         break;
                 };
+
+                Console.WriteLine();
             }
         }
     }
